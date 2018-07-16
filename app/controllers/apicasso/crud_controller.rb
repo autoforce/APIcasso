@@ -30,8 +30,23 @@ module Apicasso
 
     # PATCH/PUT /:resource/1
     def update
+      authorize_for(action: :update,
+                    resource: resource.name.underscore.to_sym,
+                    object: @object)
       if @object.update(object_params)
         render json: @object
+      else
+        render json: @object.errors, status: :unprocessable_entity
+      end
+    end
+
+    # DELETE /:resource/1
+    def destroy
+      authorize_for(action: :destroy,
+                    resource: resource.name.underscore.to_sym,
+                    object: @object)
+      if @object.destroy
+        head :no_content
       else
         render json: @object.errors, status: :unprocessable_entity
       end
@@ -43,6 +58,9 @@ module Apicasso
     # POST /:resource
     def create
       @object = resource.new(resource_params)
+      authorize_for(action: :create,
+                    resource: resource.name.underscore.to_sym,
+                    object: @object)
       if @object.save
         render json: @object, status: :created, location: @object
       else

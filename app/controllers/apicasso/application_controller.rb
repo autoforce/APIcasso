@@ -97,5 +97,11 @@ module Apicasso
       uri.query = Rack::Utils.build_query(query)
       uri.to_s
     end
+
+    # Receives a `:action, :resource, :object` hash to validate authorization
+    def authorize_for(opts = {})
+      authorize! opts[:action], opts[:resource] if opts[:resource].present?
+      authorize! opts[:action], opts[:object] if opts[:object].present?
+    end
   end
 end
