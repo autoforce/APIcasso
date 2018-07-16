@@ -20,7 +20,6 @@ Gem::Specification.new do |s|
                 'README.md']
 
   s.add_dependency 'cancancan', '~> 2.0'
-  s.add_dependency 'discard', '~> 1.0'
   s.add_dependency 'rails', '> 5'
   s.add_dependency 'will_paginate', '~> 3.1.0'
 
