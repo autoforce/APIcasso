@@ -17,7 +17,7 @@ module Apicasso
       end
 
       def copy_migrations
-        migration_template 'create_something.rb',
+        migration_template 'create_apicasso_tables.rb',
                            'db/migrate/create_apicasso_tables.rb'
       end
     end
