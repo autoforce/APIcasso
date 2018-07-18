@@ -1,4 +1,4 @@
-class CreateApiObjects < ActiveRecord::Migration[5.0]
+class CreateApicassoTables < ActiveRecord::Migration[5.0]
   def change
     create_table :apicasso_keys, id: :uuid do |t|
       t.json :scope

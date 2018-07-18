@@ -1,5 +1,6 @@
+# frozen_string_literal: true
+
 module Apicasso
   class Engine < ::Rails::Engine
-    isolate_namespace Apicasso
   end
 end

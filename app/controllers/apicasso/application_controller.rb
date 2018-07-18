@@ -4,7 +4,6 @@ module Apicasso
   # Controller to extract common API features,
   # such as authentication and authorization
   class ApplicationController < ActionController::API
-    protect_from_forgery with: :exception
     include ActionController::HttpAuthentication::Token::ControllerMethods
     prepend_before_action :restrict_access
     after_action :register_api_request

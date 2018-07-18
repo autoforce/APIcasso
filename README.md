@@ -1,9 +1,9 @@
-<img src="https://raw.githubusercontent.com/ErvalhouS/APIcasso/master/APIcasso.png" width="300" />
+<img src="https://raw.githubusercontent.com/ErvalhouS/APIcasso/master/APIcasso.png" width="300" /> [![Gem Version](https://badge.fury.io/rb/apicasso.svg)](https://badge.fury.io/rb/apicasso)
 
 JSON API development can get boring and time consuming. If you think it through, every time you make one you use almost the same route structure, pointing to the same controller actions, with the same ordering, filtering and pagination features.
 
 **APIcasso** is intended to be used as a full-fledged CRUD JSON API or as a base controller to speed-up development.
-It is a route-based resource abstraction using API key scoping. This makes it possible to make CRUD-only applications just by creating functional Rails' models. It is a perfect candidate for legacy Rails projects that do not have an API. Access to your application's resources is managed by a `.scope` JSON object in every each API key. It uses that permission scope to restrict and extend access.
+It is a route-based resource abstraction using API key scoping. This makes it possible to make CRUD-only applications just by creating functional Rails' models. It is a perfect candidate for legacy Rails projects that do not have an API. Access to your application's resources is managed by a `.scope` JSON object per API key. It uses that permission scope to restrict and extend access.
 
 ## Installation
 Add this line to your application's `Gemfile`:
@@ -56,9 +56,11 @@ Your API is then exposed based on each `Apicasso::Key.scope` definition
 ```
 This translates directly into which parts of your application is exposed to each APIcasso keys.
 
-The key from this example will have full access to all orders, to users with `account_id == 1` and read-only access to accounts with `id == 1`. This avoids you having to setup each and every controller for each model, but if your application really needs it just make your controller inherit from `Apicasso::CrudController` and extend it's functionalities. This feature is why one of the dependencies for this gem is [CanCanCan](https://github.com/CanCanCommunity/cancancan), which uses that scope field to authorize access into your application's resources.
+The key from this example will have full access to all orders and to users with `account_id == 1`. It will have also read-only access to accounts with `id == 1`.
 
-The `crud#index` and `crud#nested_index` actions lists records are already equipped with pagination, ordering and filtering.
+This saves you the trouble of having to setup each and every controller for each model. And even if your application really need it, just make your controllers inherit from `Apicasso::CrudController` and extend it's functionalities. This authorization feature is why one of the dependencies for this gem is [CanCanCan](https://github.com/CanCanCommunity/cancancan), that abstracts the scope field into authorization for your application's resources.
+
+The `crud#index` and `crud#nested_index` actions are already equipped with pagination, ordering and filtering.
 
  - You can pass `params[:sort]` with field names preffixed with `+` or `-` to configure custom ordering per request. I.E.: `?sort=+updated_at,-name`
  - You can pass `params[:q]` using [ransack's search matchers](https://github.com/activerecord-hackery/ransack#search-matchers) to build a search query. I.E.: `?q[full_name_start]=Picasso`
@@ -76,7 +78,7 @@ Everyone interacting in the APIcasso project’s codebases, issue trackers, chat
 ## TODO
 
  - Add gem options like: Token rotation, Alternative authentication methods
- - Swagger json exporting
+ - Response fields selecting
  - Rate limiting
  - Testing suite
  - Travis CI
