@@ -26,10 +26,8 @@ module Apicasso
     # a hash of the request and the response
     def register_api_request
       Apicasso::Request.delay.create(api_key_id: @api_key.id,
-                                object: {
-                                  request: request_hash,
-                                  response: response_hash
-                                })
+                                     object: { request: request_hash,
+                                               response: response_hash })
     end
 
     # Request data built as a hash.
