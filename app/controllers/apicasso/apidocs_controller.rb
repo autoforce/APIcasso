@@ -313,7 +313,7 @@ module Apicasso
         end
       end
 
-      model.reflect_on_all_associations.map(&:name) do |association|
+      model.reflect_on_all_associations.map(&:name).each do |association|
         inner_name = extract_klass_name(model: model, association: association)
         inner_klass = extract_klass(model: model, association: association)
         swagger_path "/#{model.name.underscore}/{id}/#{association}" do
