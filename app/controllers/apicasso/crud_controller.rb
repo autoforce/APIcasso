@@ -73,10 +73,18 @@ module Apicasso
     # Will return a JSON with the schema of the current resource, using
     # attribute names as keys and attirbute types as values.
     def schema
+      set_access_control_headers
       render json: resource_schema.to_json
     end
 
     private
+
+    def set_access_control_headers
+      response.headers['Access-Control-Allow-Origin'] = '*'
+      response.headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, PATCH, DELETE, OPTIONS'
+      response.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization, Token, Auth-Token, Email, X-User-Token, X-User-Email'
+      response.headers['Access-Control-Max-Age'] = '1728000'
+    end
 
     # Common setup to stablish which model is the resource of this request
     def set_root_resource
