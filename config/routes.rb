@@ -1,5 +1,6 @@
 Apicasso::Engine.routes.draw do
   scope module: :apicasso do
+    resources :apidocs, only: [:index]
     get '/:resource/', to: 'crud#index', via: :get
     match '/:resource/', to: 'crud#create', via: :post
     get '/:resource/:id', to: 'crud#show', via: :get
@@ -8,6 +9,5 @@ Apicasso::Engine.routes.draw do
     match '/:resource/:id/:nested/', to: 'crud#nested_index', via: :get
     match '/:resource/', to: 'crud#schema', via: :options
     match '/:resource/:id/:nested/', to: 'crud#schema', via: :options
-    resources :apidocs, only: [:index]
   end
 end
