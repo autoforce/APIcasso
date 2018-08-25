@@ -19,7 +19,7 @@ module Orderable
     params[:sort].try(:split, ',').try(:each) do |attr|
       parsed_attr = parse_attr attr
       if model.attribute_names.include?(parsed_attr)
-        ordering[parsed_attr] = SORT_ORDER[parse_sign parsed_attr]
+        ordering[parsed_attr] = SORT_ORDER[parse_sign attr]
       end
     end
     ordering
