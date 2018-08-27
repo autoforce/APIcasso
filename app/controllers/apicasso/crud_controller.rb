@@ -19,7 +19,7 @@ module Apicasso
     # the page 42 of that collection. Usage:
     # GET /sites?sort=+name,-updated_at&q[domain_eq]=domain.com&page=42&per_page=42
     def index
-      render json: response_json
+      render json: index_json
     end
 
     # GET /:resource/1
@@ -78,13 +78,6 @@ module Apicasso
 
     private
 
-    def set_access_control_headers
-      response.headers['Access-Control-Allow-Origin'] = '*'
-      response.headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, PATCH, DELETE, OPTIONS'
-      response.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization, Token, Auth-Token, Email, X-User-Token, X-User-Email'
-      response.headers['Access-Control-Max-Age'] = '1728000'
-    end
-
     # Common setup to stablish which model is the resource of this request
     def set_root_resource
       @root_resource = params[:resource].classify.constantize
@@ -123,6 +116,13 @@ module Apicasso
       authorize! :read, resource.name.underscore.to_sym
       @records = resource.ransack(parsed_query).result
       reorder_records if params[:sort].present?
+      select_fields if params[:select].present?
+    end
+
+    # Selects a fieldset that should be returned, instead of all fields
+    # from records.
+    def select_fields
+      @records = @records.select(*params[:select].split(','))
     end
 
     # Reordering of records which happens when receiving `params[:sort]`
@@ -132,18 +132,48 @@ module Apicasso
 
     # Raw paginated records object
     def paginated_records
-      @records.accessible_by(current_ability)
-              .paginate(page: params[:page], per_page: params[:per_page])
+      accessible_records
+        .paginate(page: params[:page], per_page: params[:per_page])
+    end
+
+    # Records that can be accessed from current Apicasso::Key scope
+    # permissions
+    def accessible_records
+      @records.accessible_by(current_ability).unscope(:order)
+    end
+
+    # The response for index action, which can be a pagination of a record collection
+    # or a grouped count of attributes
+    def index_json
+      if params[:group].present?
+        accessible_records.group(params[:group].split(',')).count
+      else
+        collection_response
+      end
     end
 
     # Parsing of `paginated_records` with pagination variables metadata
-    def response_json
+    def built_paginated
       { entries: entries_json }.merge(pagination_metadata_for(paginated_records))
+    end
+
+    # All records matching current query and it's total
+    def built_unpaginated
+      { entries: accessible_records, total: accessible_records.size }
     end
 
     # Parsed JSON to be used as response payload
     def entries_json
       JSON.parse(paginated_records.to_json(include: parsed_include))
+    end
+
+    # Returns the collection checking if it needs pagination
+    def collection_response
+      if params[:per_page].to_i == -1
+        built_unpaginated
+      else
+        built_paginated
+      end
     end
 
     # Only allow a trusted parameter "white list" through,
