@@ -72,8 +72,12 @@ module Apicasso
     # Will return a JSON with the schema of the current resource, using
     # attribute names as keys and attirbute types as values.
     def schema
-      set_access_control_headers
-      render json: resource_schema.to_json
+      if preflight?
+        set_access_control_headers
+        head :no_content
+      else
+        render json: resource_schema.to_json
+      end
     end
 
     private

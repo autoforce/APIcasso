@@ -77,9 +77,9 @@ Everyone interacting in the APIcasso project’s codebases, issue trackers, chat
 
 ## TODO
 
- - Abstract a configurable CORS approach.
+ - Abstract a configurable CORS approach, maybe using middleware.
  - Add gem options like: Token rotation, Alternative authentication methods
- - Response fields selecting
+ - Add latest features into README: fieldset selection, grouping responses, infinite collections, auto-documentation
  - Rate limiting
  - Testing suite
  - Travis CI

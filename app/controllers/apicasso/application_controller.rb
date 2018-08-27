@@ -5,7 +5,7 @@ module Apicasso
   # such as authentication and authorization
   class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
-    prepend_before_action :restrict_access
+    prepend_before_action :restrict_access, unless: -> { preflight? }
     after_action :register_api_request
 
     # Sets the authorization scope for the current API key
@@ -25,7 +25,7 @@ module Apicasso
     # Creates a request object in databse, registering the API key and
     # a hash of the request and the response
     def register_api_request
-      Apicasso::Request.delay.create(api_key_id: @api_key.id,
+      Apicasso::Request.delay.create(api_key_id: @api_key.try(:id),
                                      object: { request: request_hash,
                                                response: response_hash })
     end
@@ -46,7 +46,7 @@ module Apicasso
     def response_hash
       {
         status: response.status,
-        body: JSON.parse(response.body)
+        body: (response.body.present? ? JSON.parse(response.body): '')
       }
     end
 
@@ -106,6 +106,11 @@ module Apicasso
       response.headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, PATCH, DELETE, OPTIONS'
       response.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization, Token, Auth-Token, Email, X-User-Token, X-User-Email'
       response.headers['Access-Control-Max-Age'] = '1728000'
+    end
+
+    def preflight?
+      request.request_method == 'OPTIONS' &&
+        !request.headers['Authorization'].present?
     end
   end
 end
