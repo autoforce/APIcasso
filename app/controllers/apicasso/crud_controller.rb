@@ -7,7 +7,6 @@ module Apicasso
     before_action :set_object, except: %i[index schema create]
     before_action :set_nested_resource, only: %i[nested_index]
     before_action :set_records, only: %i[index nested_index]
-    before_action :set_schema, only: %i[schema]
 
     include Orderable
 
