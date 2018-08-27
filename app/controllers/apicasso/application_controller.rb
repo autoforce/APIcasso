@@ -6,6 +6,7 @@ module Apicasso
   class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
     prepend_before_action :restrict_access, unless: -> { preflight? }
+    before_action :set_access_control_headers
     after_action :register_api_request
 
     # Sets the authorization scope for the current API key

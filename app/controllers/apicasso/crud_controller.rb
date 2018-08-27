@@ -19,11 +19,13 @@ module Apicasso
     # the page 42 of that collection. Usage:
     # GET /sites?sort=+name,-updated_at&q[domain_eq]=domain.com&page=42&per_page=42
     def index
+      set_access_control_headers
       render json: index_json
     end
 
     # GET /:resource/1
     def show
+      set_access_control_headers
       render json: @object.to_json(include: parsed_include)
     end
 
@@ -72,12 +74,7 @@ module Apicasso
     # Will return a JSON with the schema of the current resource, using
     # attribute names as keys and attirbute types as values.
     def schema
-      if preflight?
-        set_access_control_headers
-        head :no_content
-      else
-        render json: resource_schema.to_json
-      end
+      render json: resource_schema.to_json unless preflight?
     end
 
     private
