@@ -116,8 +116,10 @@ module Apicasso
     def set_records
       authorize! :read, resource.name.underscore.to_sym
       @records = resource.ransack(parsed_query).result
+      key_scope_records
       reorder_records if params[:sort].present?
       select_fields if params[:select].present?
+      include_relations if params[:include].present?
     end
 
     # Selects a fieldset that should be returned, instead of all fields
@@ -133,14 +135,14 @@ module Apicasso
 
     # Raw paginated records object
     def paginated_records
-      accessible_records
+      @records
         .paginate(page: params[:page], per_page: params[:per_page])
     end
 
     # Records that can be accessed from current Apicasso::Key scope
     # permissions
-    def accessible_records
-      @records.accessible_by(current_ability).unscope(:order)
+    def key_scope_records
+      @records = @records.accessible_by(current_ability).unscope(:order)
     end
 
     # The response for index action, which can be a pagination of a record collection
@@ -155,17 +157,25 @@ module Apicasso
 
     # Parsing of `paginated_records` with pagination variables metadata
     def built_paginated
-      { entries: entries_json }.merge(pagination_metadata_for(paginated_records))
+      { entries: @records }.merge(pagination_metadata_for(paginated_records))
     end
 
     # All records matching current query and it's total
     def built_unpaginated
-      { entries: accessible_records, total: accessible_records.size }
+      { entries: @records, total: @records.size }
     end
 
-    # Parsed JSON to be used as response payload
-    def entries_json
-      JSON.parse(paginated_records.to_json(include: parsed_include))
+    # Parsed JSON to be used as response payload, with included relations
+    def include_relations
+      @records = JSON.parse(included_collection.to_json(include: parsed_include))
+    end
+
+    def included_collection
+      if @records.try(:includes, parsed_include).present?
+        @records.includes(parsed_include)
+      else
+        @records
+      end
     end
 
     # Returns the collection checking if it needs pagination
