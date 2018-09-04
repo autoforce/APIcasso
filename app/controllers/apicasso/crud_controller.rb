@@ -174,13 +174,11 @@ module Apicasso
       @records = JSON.parse(included_collection.to_json(include: parsed_include))
     end
 
-    # A way to SQL-include if available for current param[:include]
+    # A way to SQL-include for current param[:include], only if available
     def included_collection
-      if @records.try(:includes, parsed_include).present?
-        @records.includes(parsed_include)
-      else
-        @records
-      end
+      @records.includes(parsed_include)
+    rescue ActiveRecord::AssociationNotFoundError
+      @records
     end
 
     # Returns the collection checking if it needs pagination
