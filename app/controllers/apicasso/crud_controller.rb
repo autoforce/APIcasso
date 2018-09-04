@@ -24,12 +24,15 @@ module Apicasso
     end
 
     # GET /:resource/1
+    # Common behavior for showing a record, with an addition of
+    # relation/methods including on response
     def show
       set_access_control_headers
       render json: @object.to_json(include: parsed_include)
     end
 
     # PATCH/PUT /:resource/1
+    # Common behavior for an update API endpoint
     def update
       authorize_for(action: :update,
                     resource: resource.name.underscore.to_sym,
@@ -42,12 +45,13 @@ module Apicasso
     end
 
     # DELETE /:resource/1
+    # Common behavior for an destroy API endpoint
     def destroy
       authorize_for(action: :destroy,
                     resource: resource.name.underscore.to_sym,
                     object: @object)
       if @object.destroy
-        head :no_content
+			  head :no_content, status: :ok
       else
         render json: @object.errors, status: :unprocessable_entity
       end
@@ -157,7 +161,7 @@ module Apicasso
 
     # Parsing of `paginated_records` with pagination variables metadata
     def built_paginated
-      { entries: @records }.merge(pagination_metadata_for(paginated_records))
+      { entries: paginated_records }.merge(pagination_metadata_for(paginated_records))
     end
 
     # All records matching current query and it's total
@@ -170,6 +174,7 @@ module Apicasso
       @records = JSON.parse(included_collection.to_json(include: parsed_include))
     end
 
+    # A way to SQL-include if available for current param[:include]
     def included_collection
       if @records.try(:includes, parsed_include).present?
         @records.includes(parsed_include)

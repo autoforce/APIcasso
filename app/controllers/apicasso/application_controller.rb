@@ -47,7 +47,7 @@ module Apicasso
     def response_hash
       {
         status: response.status,
-        body: (response.body.present? ? JSON.parse(response.body): '')
+        body: (response.body.present? ? JSON.parse(response.body) : '')
       }
     end
 
