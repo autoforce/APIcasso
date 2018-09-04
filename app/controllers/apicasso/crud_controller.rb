@@ -28,7 +28,7 @@ module Apicasso
     # relation/methods including on response
     def show
       set_access_control_headers
-      render json: @object.to_json(include: parsed_include)
+      render json: show_json
     end
 
     # PATCH/PUT /:resource/1
@@ -159,6 +159,16 @@ module Apicasso
       end
     end
 
+    # The response for show action, which can be a fieldset
+    # or a full response of attributes
+    def show_json
+      if params[:select].present?
+        @object.to_json(include: parsed_include, only: parsed_select)
+      else
+        @object.to_json(include: parsed_include)
+      end
+    end
+
     # Parsing of `paginated_records` with pagination variables metadata
     def built_paginated
       { entries: paginated_records }.merge(pagination_metadata_for(paginated_records))
@@ -172,6 +182,8 @@ module Apicasso
     # Parsed JSON to be used as response payload, with included relations
     def include_relations
       @records = JSON.parse(included_collection.to_json(include: parsed_include))
+    rescue ActiveRecord::AssociationNotFoundError
+      @records = JSON.parse(@records.to_json(include: parsed_include))
     end
 
     # A way to SQL-include for current param[:include], only if available

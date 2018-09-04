@@ -66,6 +66,12 @@ module Apicasso
       []
     end
 
+    def parsed_select
+      params[:select].split(',')
+    rescue NoMethodError
+      []
+    end
+
     # Receives a `.paginate`d collection and returns the pagination
     # metadata to be merged into response
     def pagination_metadata_for(records)
