@@ -153,7 +153,7 @@ module Apicasso
     # or a grouped count of attributes
     def index_json
       if params[:group].present?
-        accessible_records.group(params[:group][:by].split(',')).send(params[:group][:calculate], params[:group][:fields])
+        @records.group(params[:group][:by].split(',')).send(params[:group][:calculate], params[:group][:fields])
       else
         collection_response
       end
