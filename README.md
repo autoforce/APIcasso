@@ -76,9 +76,9 @@ Your Models are then exposed based on each `Apicasso::Key.scope` definition, whi
 ```ruby
   Apicasso::Key.create(scope:
                         { manage:
-                            [{ order: true }, { user: { account_id: 1 } }],
+                            { order: true, user: { account_id: 1 } },
                           read:
-                            [{ account: { manager_id: 1 } }]
+                            { account: { manager_id: 1 } }
                         })
 ```
 > The key from this example will have full access to all orders and to users with `account_id == 1`. It will have also read-only access to accounts with `id == 1`.
