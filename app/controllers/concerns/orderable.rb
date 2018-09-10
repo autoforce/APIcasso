@@ -30,7 +30,8 @@ module Orderable
   # Parsing of attributes to avoid empty starts in case browser passes "+" as " "
   def parse_attr(attr)
     return attr.gsub(/^\ (.*)/, '\1') if attr.starts_with?(' ')
-    attr[1..-1]
+    return attr[1..-1] if attr.starts_with?('+') || attr.starts_with?('-')
+    attr
   end
 
   # Ordering sign parse, which separates
