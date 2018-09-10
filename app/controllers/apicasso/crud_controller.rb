@@ -182,7 +182,7 @@ module Apicasso
     # Parsed JSON to be used as response payload, with included relations
     def include_relations
       @records = JSON.parse(included_collection.to_json(include: parsed_include))
-    rescue ActiveRecord::AssociationNotFoundError
+    rescue ActiveRecord::AssociationNotFoundError, ActiveRecord::ConfigurationError
       @records = JSON.parse(@records.to_json(include: parsed_include))
     end
 
