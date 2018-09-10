@@ -30,16 +30,16 @@ module Orderable
   # Parsing of attributes to avoid empty starts in case browser passes "+" as " "
   def parse_attr(attr)
     return attr.gsub(/^\ (.*)/, '\1') if attr.starts_with?(' ')
-    return attr[1..-1] if attr.starts_with?('+') || attr.starts_with?('-')
+    return attr[1..-1] if attr.match?(/\A[+-]/)
     attr
   end
 
   # Ordering sign parse, which separates
   def parse_sign(attr)
-    attr =~ /\A[+-]/ ? attr.slice!(0) : '+'
+    attr.match?(/\A[+-]/) ? attr.slice!(0) : '+'
   end
 
   def model
-    (params[:resource] || params[:nested] || controller_name).classify.constantize
+    (params[:nested] || params[:resource] || controller_name).classify.constantize
   end
 end
