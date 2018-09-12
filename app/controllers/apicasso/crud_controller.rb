@@ -13,11 +13,11 @@ module Apicasso
     # GET /:resource
     # Returns a paginated, ordered and filtered query based response.
     # Consider this
-    # To get all `Channel` sorted by ascending `name` and descending
-    # `updated_at`, filtered by the ones that have a `domain` that matches
-    # exactly `"domain.com"`, paginating records 42 per page and retrieving
-    # the page 42 of that collection. Usage:
-    # GET /sites?sort=+name,-updated_at&q[domain_eq]=domain.com&page=42&per_page=42
+    # To get all `Channel` sorted by ascending `name` , filtered by
+    # the ones that have a `domain` that matches exactly `"domain.com"`,
+    # paginating records 42 per page and retrieving the page 42.
+    # Example:
+    #   GET /sites?sort=+name,-updated_at&q[domain_eq]=domain.com&page=42&per_page=42
     def index
       set_access_control_headers
       render json: index_json
