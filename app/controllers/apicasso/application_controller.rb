@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 module Apicasso
-  # Controller to extract common API features,
-  # such as authentication and authorization
+  # Controller to extract common API features, such as authentication and
+  # authorization. Used to be inherited by non-CRUD controllers when your
+  # application needs to create custom actions.
   class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
     prepend_before_action :restrict_access, unless: -> { preflight? }
@@ -137,6 +138,7 @@ module Apicasso
       response.headers['Access-Control-Max-Age'] = '1728000'
     end
 
+    # Checks if current request is a CORS preflight check
     def preflight?
       request.request_method == 'OPTIONS' &&
         !request.headers['Authorization'].present?

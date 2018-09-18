@@ -4,7 +4,7 @@ module Apicasso
   # Controller to consume read-only data to be used on client's frontend
   class CrudController < Apicasso::ApplicationController
     before_action :set_root_resource
-    before_action :set_object, except: %i[index schema create]
+    before_action :set_object, only: %i[show update destroy]
     before_action :set_nested_resource, only: %i[nested_index]
     before_action :set_records, only: %i[index nested_index]
 
@@ -51,7 +51,7 @@ module Apicasso
                     resource: resource.name.underscore.to_sym,
                     object: @object)
       if @object.destroy
-			  head :no_content, status: :ok
+        head :no_content, status: :ok
       else
         render json: @object.errors, status: :unprocessable_entity
       end
@@ -62,7 +62,7 @@ module Apicasso
 
     # POST /:resource
     def create
-      @object = resource.new(resource_params)
+      @object = resource.new(object_params)
       authorize_for(action: :create,
                     resource: resource.name.underscore.to_sym,
                     object: @object)
@@ -153,7 +153,7 @@ module Apicasso
     # or a grouped count of attributes
     def index_json
       if params[:group].present?
-        @records.group(params[:group][:by].split(',')).send(params[:group][:calculate], params[:group][:fields])
+        @records.group(params[:group][:by].split(',')).send(params[:group][:calculate], params[:group][:fields]||params[:group][:by].split(','))
       else
         collection_response
       end
