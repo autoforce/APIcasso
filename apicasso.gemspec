@@ -18,12 +18,19 @@ Gem::Specification.new do |s|
                 'MIT-LICENSE',
                 'Rakefile',
                 'README.md']
-  s.require_path  = 'lib'
+  s.require_path = 'lib'
+  s.test_files = Dir["spec/**/*"]
+
+
+  s.add_development_dependency 'bundler'
+  s.add_development_dependency 'sqlite3'
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'capybara'
+  s.add_development_dependency 'factory_girl_rails'
 
   s.add_dependency 'cancancan', '~> 2.0'
   s.add_dependency 'rails', '> 5'
   s.add_dependency 'swagger-blocks'
   s.add_dependency 'will_paginate', '~> 3.1.0'
-
-  s.add_development_dependency 'sqlite3'
 end
