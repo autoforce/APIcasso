@@ -16,7 +16,7 @@ module Apicasso
             # To have a key reading all channels and all accouts
             # you would have a scope:
             # => `{read: {channel: true, accout: true}}`
-            can permission.to_sym, klass.underscore.to_sym
+            can permission.to_sym, klass.underscore.singularize.to_sym
             can permission.to_sym, klass.classify.constantize
           elsif clearance.class == Hash
             # Usage:
@@ -24,7 +24,7 @@ module Apicasso
             # you would have a scope:
             # => `{read: {banner: {owner_id: [999]}}}`
             can permission.to_sym,
-                klass.underscore.to_sym
+                klass.underscore.singularize.to_sym
             clearance.each do |by_field, values|
               can permission.to_sym,
                   klass.classify.constantize,
