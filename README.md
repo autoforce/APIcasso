@@ -19,7 +19,7 @@ And then execute this to generate the required migrations:
 $ bundle install && rails g apicasso:install
 ```
 
-You will need to use a database with JSON fields support to use this gem.
+### You will must have PostgreSQL as database to be able to use this gem.
 
 # Usage
 
@@ -176,7 +176,7 @@ If there is any method or relation that you want to be inserted on the payload, 
 ?include=pictures,suggestions
 ```
 
-This will insert the contents of `.pictures` and `.suggestions` on the payload, along with the records' data. **This method can be used both on index and show actions**
+This will insert the contents of `.pictures` and `.suggestions` on the payload, along with the records' data. This means you can populate the payload both with methods or relations contents. **This method can be used both on index and show actions**
 
 ### Grouping operations
 
@@ -206,9 +206,10 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/Ervalh
 
 ### TODO
 
-- Abstract a configurable CORS approach, maybe using middleware.
+- Add support to other databases
+- Abstract a configurable CORS approach, maybe using middleware
 - Add gem options like: Token rotation, Alternative authentication methods
-- Add latest auto-documentation feature into README
+- Refine and document auto-documentation feature
 - Rate limiting
 - Testing suite
 - Travis CI

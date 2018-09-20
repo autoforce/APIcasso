@@ -1,5 +1,8 @@
 class CreateApicassoTables < ActiveRecord::Migration[5.0]
   def change
+    execute <<-SQL
+      CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+    SQL
     create_table :apicasso_keys, id: :uuid do |t|
       t.json :scope
       t.integer :scope_type
