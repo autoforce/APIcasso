@@ -67,7 +67,7 @@ module Apicasso
                     resource: resource.name.underscore.to_sym,
                     object: @object)
       if @object.save
-        render json: @object, status: :created, location: @object
+        render json: @object, status: :created
       else
         render json: @object.errors, status: :unprocessable_entity
       end
@@ -205,7 +205,41 @@ module Apicasso
     # Only allow a trusted parameter "white list" through,
     # based on resource's schema.
     def object_params
-      params.fetch(resource.name.underscore.to_sym, resource_schema.keys)
+      params.require(resource.name.underscore.to_sym)
+            .permit(resource_params)
+    end
+
+    # Resource params mapping, with a twist:
+    # Including relations as they are needed
+    def resource_params
+      built = resource_schema.keys
+      built += has_one_params if has_one_params.present?
+      built += has_many_params if has_many_params.present?
+      built
+    end
+
+    # A wrapper to has_one relations parameter building
+    def has_one_params
+      resource.reflect_on_all_associations(:has_one).map do |one|
+        if one.class_name.starts_with?('ActiveStorage')
+          next if one.class_name.ends_with?('Blob')
+          one.name.to_s.gsub(/(_attachment)$/, '').to_sym
+        else
+          one.name
+        end
+      end.compact
+    end
+
+    # A wrapper to has_many parameter building
+    def has_many_params
+      resource.reflect_on_all_associations(:has_many).map do |many|
+        if many.class_name.starts_with?('ActiveStorage')
+          next if many.class_name.ends_with?('Blob')
+          { many.name.to_s.gsub(/(_attachments)$/, '').to_sym => [] }
+        else
+          { many.name.to_sym => [] }
+        end
+      end.compact
     end
   end
 end
