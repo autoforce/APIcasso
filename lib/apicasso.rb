@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 require 'cancancan'
-require 'swagger-blocks'
+require 'swagger/blocks'
+require 'ransack'
 require 'will_paginate'
 require 'apicasso/version'
 require 'apicasso/engine'
