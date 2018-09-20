@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'cancancan'
+require 'swagger-blocks'
+require 'will_paginate'
 require 'apicasso/version'
 require 'apicasso/engine'
 require 'apicasso/active_record_extension'
