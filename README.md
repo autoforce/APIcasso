@@ -19,7 +19,7 @@ And then execute this to generate the required migrations:
 $ bundle install && rails g apicasso:install
 ```
 
-### You will must have PostgreSQL as database to be able to use this gem.
+### You must have PostgreSQL as database to be able to use this gem.
 
 # Usage
 
