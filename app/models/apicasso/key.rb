@@ -3,7 +3,7 @@
 require 'securerandom'
 module Apicasso
   # A model to abstract API access, with scope options, token generation, request limiting
-  class Key < ApplicationRecord
+  class Key < Apicasso::ApplicationRecord
     before_create :set_auth_token
 
     private
