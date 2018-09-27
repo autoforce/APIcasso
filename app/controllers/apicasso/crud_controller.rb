@@ -129,7 +129,9 @@ module Apicasso
     # Selects a fieldset that should be returned, instead of all fields
     # from records.
     def select_fields
-      @records = @records.select(*params[:select].split(','))
+      params[:select].split(',').each do |p|
+        @records = @records.select(p) if @records.column_names.include?(p)
+      end
     end
 
     # Reordering of records which happens when receiving `params[:sort]`
