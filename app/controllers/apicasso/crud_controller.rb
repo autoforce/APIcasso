@@ -4,7 +4,7 @@ module Apicasso
   # Controller to consume read-only data to be used on client's frontend
   class CrudController < Apicasso::ApplicationController
     before_action :set_root_resource
-    before_action :set_object, only: %i[show update destroy]
+    before_action :set_object, except: %i[index create schema]
     before_action :set_nested_resource, only: %i[nested_index]
     before_action :set_records, only: %i[index nested_index]
 
