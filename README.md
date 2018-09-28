@@ -198,7 +198,7 @@ Each of those attributes on the `?group` parameter represent an option of the qu
 
 - `group[by]` - Represents which field will be the key for the grouping behavior
 - `group[calculate]` - Which calculation will be sent in the response. Options are: `count`, `maximum`, `minimum`, `average`, `sum`
-- `group[fields]` - Represents which field will be the base for the response calculation.
+- `group[field]` - Represents which field will be the base for the response calculation.
 
 # Contributing
 
