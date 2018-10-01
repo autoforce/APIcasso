@@ -165,9 +165,15 @@ module Apicasso
     # or a full response of attributes
     def show_json
       if params[:select].present?
-        @object.to_json(include: parsed_include, only: parsed_select)
+        options = include_options @object
+        @object.to_json(include: options[:associations], methods: options[:methods], only: parsed_select)
       else
-        @object.to_json(include: parsed_include)
+        include_json = {}
+        parsed_include.map do |inc|
+          value = @object.public_send(inc) unless @object.public_send(inc).nil?
+          include_json = include_json.merge({ inc => value }.as_json)
+        end
+        @object.as_json.merge(include_json.as_json)
       end
     end
 
@@ -181,18 +187,26 @@ module Apicasso
       { entries: @records, total: @records.size }
     end
 
-    # Parsed JSON to be used as response payload, with included relations
-    def include_relations
-      @records = JSON.parse(included_collection.to_json(include: parsed_include))
-    rescue ActiveRecord::AssociationNotFoundError, ActiveRecord::ConfigurationError
-      @records = JSON.parse(@records.to_json(include: parsed_include))
+    # Parse to include options
+    def include_options(object)
+      methods_include = []
+      associations_include = []
+      associations_array = resource.reflect_on_all_associations.map { |association| association.name.to_s }
+      parsed_include.map do |include_param|
+        if object.respond_to?(include_param)
+          if !associations_array.include?(include_param) ? methods_include << include_param : associations_include << include_param
+          end
+        end
+      end
+      { associations: associations_include, methods: methods_include }
     end
 
-    # A way to SQL-include for current param[:include], only if available
-    def included_collection
-      @records.includes(parsed_include)
-    rescue ActiveRecord::AssociationNotFoundError
-      @records
+    # Parsed JSON to be used as response payload, with included relations
+    def include_relations
+      @records = @records.map do |object|
+        options = include_options object
+        object.as_json(include: options[:associations], methods: options[:methods])
+      end
     end
 
     # Returns the collection checking if it needs pagination

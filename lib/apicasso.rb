@@ -3,6 +3,7 @@
 require 'cancancan'
 require 'swagger/blocks'
 require 'ransack'
+require 'will_paginate/array'
 require 'will_paginate'
 require 'apicasso/version'
 require 'apicasso/engine'
