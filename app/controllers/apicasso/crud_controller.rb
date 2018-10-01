@@ -129,7 +129,7 @@ module Apicasso
     # Selects a fieldset that should be returned, instead of all fields
     # from records.
     def select_fields
-      params[:select].split(',').each do |p|
+      parsed_select.each do |p|
         @records = @records.select(p) if @records.column_names.include?(p)
       end
     end
@@ -187,18 +187,22 @@ module Apicasso
       { entries: @records, total: @records.size }
     end
 
+    # Build the payload at include
+    def built_include_options
+      @methods_include = []
+      @associations_include = []
+      @associations_array = resource.reflect_on_all_associations.map { |association| association.name.to_s }
+    end
+
     # Parse to include options
     def include_options(object)
-      methods_include = []
-      associations_include = []
-      associations_array = resource.reflect_on_all_associations.map { |association| association.name.to_s }
+      built_include_options
       parsed_include.map do |include_param|
         if object.respond_to?(include_param)
-          if !associations_array.include?(include_param) ? methods_include << include_param : associations_include << include_param
-          end
+          !@associations_array.include?(include_param) ? @methods_include << include_param : @associations_include << include_param
         end
       end
-      { associations: associations_include, methods: methods_include }
+      { associations: @associations_include, methods: @methods_include }
     end
 
     # Parsed JSON to be used as response payload, with included relations
