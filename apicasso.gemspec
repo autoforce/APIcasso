@@ -34,4 +34,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'swagger-blocks'
   s.add_dependency 'ransack'
   s.add_dependency 'will_paginate', '~> 3.1.0'
+  s.add_dependency 'friendly_id', '~> 5.2.0'
 end
