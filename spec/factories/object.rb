@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :object do
     field 'value'
   end
