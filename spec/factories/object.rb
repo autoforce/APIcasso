@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :object do
-    field 'value'
+    field { 'value' }
   end
 end
