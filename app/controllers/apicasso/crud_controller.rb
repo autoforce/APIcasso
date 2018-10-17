@@ -9,7 +9,6 @@ module Apicasso
     before_action :set_records, only: %i[index nested_index]
 
     include Orderable
-
     # GET /:resource
     # Returns a paginated, ordered and filtered query based response.
     # Consider this
