@@ -37,7 +37,7 @@ module Apicasso
                     resource: resource.name.underscore.to_sym,
                     object: @object)
       if @object.update(object_params)
-        render json: @object
+        render json: @object.to_json
       else
         render json: @object.errors, status: :unprocessable_entity
       end
@@ -66,7 +66,7 @@ module Apicasso
                     resource: resource.name.underscore.to_sym,
                     object: @object)
       if @object.save
-        render json: @object, status: :created
+        render json: @object.to_json, status: :created
       else
         render json: @object.errors, status: :unprocessable_entity
       end
