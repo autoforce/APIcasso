@@ -163,17 +163,10 @@ module Apicasso
     # The response for show action, which can be a fieldset
     # or a full response of attributes
     def show_json
-      if params[:select].present?
         options = include_options @object
-        @object.to_json(include: options[:associations], methods: options[:methods], only: parsed_select)
-      else
-        include_json = {}
-        parsed_include.map do |inc|
-          value = @object.public_send(inc) unless @object.public_send(inc).nil?
-          include_json = include_json.merge({ inc => value }.as_json)
-        end
-        @object.as_json.merge(include_json.as_json)
-      end
+        json_hash = { include: options[:associations], methods: options[:methods] }
+        json_hash[:only] = parsed_select if params[:select].present?
+        @object.to_json(json_hash)
     end
 
     # Parsing of `paginated_records` with pagination variables metadata
@@ -196,9 +189,9 @@ module Apicasso
     # Parse to include options
     def include_options(object)
       built_include_options
-      parsed_include.map do |include_param|
+      parsed_include.each do |include_param|
         if object.respond_to?(include_param)
-          !@associations_array.include?(include_param) ? @methods_include << include_param : @associations_include << include_param
+          @associations_array.include?(include_param) ? @associations_include << include_param : @methods_include << include_param
         end
       end
       { associations: @associations_include, methods: @methods_include }
