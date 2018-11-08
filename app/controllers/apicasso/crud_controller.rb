@@ -7,7 +7,6 @@ module Apicasso
     before_action :set_object, except: %i[index create schema]
     before_action :set_nested_resource, only: %i[nested_index]
     before_action :set_records, only: %i[index nested_index]
-
     include Orderable
     # GET /:resource
     # Returns a paginated, ordered and filtered query based response.
@@ -119,6 +118,7 @@ module Apicasso
     def set_records
       authorize! :read, resource.name.underscore.to_sym
       @records = resource.ransack(parsed_query).result
+      @object = resource.new
       key_scope_records
       reorder_records if params[:sort].present?
       select_fields if params[:select].present?
@@ -128,9 +128,7 @@ module Apicasso
     # Selects a fieldset that should be returned, instead of all fields
     # from records.
     def select_fields
-      parsed_select.each do |p|
-        @records = @records.select(p) if @records.column_names.include?(p)
-      end
+      @records = @records.select(*parsed_select)
     end
 
     # Reordering of records which happens when receiving `params[:sort]`
@@ -154,7 +152,10 @@ module Apicasso
     # or a grouped count of attributes
     def index_json
       if params[:group].present?
-        @records.group(params[:group][:by].split(',')).send(:calculate, params[:group][:calculate], params[:group][:field])
+        @records.group(params[:group][:by].split(','))
+                .send(:calculate,
+                      params[:group][:calculate],
+                      params[:group][:field])
       else
         collection_response
       end
@@ -163,46 +164,32 @@ module Apicasso
     # The response for show action, which can be a fieldset
     # or a full response of attributes
     def show_json
-        options = include_options @object
-        json_hash = { include: options[:associations], methods: options[:methods] }
-        json_hash[:only] = parsed_select if params[:select].present?
-        @object.to_json(json_hash)
+      json_hash = include_options
+      json_hash[:only] = parsed_select if params[:select].present?
+      @object.as_json(json_hash)
     end
 
     # Parsing of `paginated_records` with pagination variables metadata
     def built_paginated
-      { entries: paginated_records }.merge(pagination_metadata_for(paginated_records))
+      { entries: paginated_records.as_json(include_options) }
+        .merge(pagination_metadata_for(paginated_records))
     end
 
     # All records matching current query and it's total
     def built_unpaginated
-      { entries: @records, total: @records.size }
-    end
-
-    # Build the payload at include
-    def built_include_options
-      @methods_include = []
-      @associations_include = []
-      @associations_array = resource.reflect_on_all_associations.map { |association| association.name.to_s }
+      { entries: @records.as_json(include_options),
+        total: @records.size }
     end
 
     # Parse to include options
-    def include_options(object)
-      built_include_options
-      parsed_include.each do |include_param|
-        if object.respond_to?(include_param)
-          @associations_array.include?(include_param) ? @associations_include << include_param : @methods_include << include_param
-        end
-      end
-      { associations: @associations_include, methods: @methods_include }
+    def include_options
+      { include: parsed_associations || [],
+        methods: parsed_methods || [] }
     end
 
     # Parsed JSON to be used as response payload, with included relations
     def include_relations
-      @records = @records.map do |object|
-        options = include_options object
-        object.as_json(include: options[:associations], methods: options[:methods])
-      end
+      @records = @records.includes(parsed_associations)
     end
 
     # Returns the collection checking if it needs pagination
@@ -235,6 +222,7 @@ module Apicasso
       resource.reflect_on_all_associations(:has_one).map do |one|
         if one.class_name.starts_with?('ActiveStorage')
           next if one.class_name.ends_with?('Blob')
+
           one.name.to_s.gsub(/(_attachment)$/, '').to_sym
         else
           one.name
@@ -247,6 +235,7 @@ module Apicasso
       resource.reflect_on_all_associations(:has_many).map do |many|
         if many.class_name.starts_with?('ActiveStorage')
           next if many.class_name.ends_with?('Blob')
+
           { many.name.to_s.gsub(/(_attachments)$/, '').to_sym => [] }
         else
           { many.name.to_sym => [] }

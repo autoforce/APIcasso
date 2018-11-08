@@ -65,6 +65,11 @@ module Apicasso
       }
     end
 
+    # A method to extract all assosciations available
+    def associations_array
+      resource.reflect_on_all_associations.map { |association| association.name.to_s }
+    end
+
     # Used to avoid errors parsing the search query, which can be passed as
     # a JSON or as a key-value param. JSON is preferred because it generates
     # shorter URLs on GET parameters.
@@ -76,8 +81,24 @@ module Apicasso
 
     # Used to avoid errors in included associations parsing and to enable a
     # insertion point for a change on splitting method.
-    def parsed_include
-      params[:include].split(',')
+    def parsed_associations
+      params[:include].split(',').map do |param|
+        if @object.respond_to?(param)
+          param if associations_array.include?(param)
+        end
+      end.compact
+    rescue NoMethodError
+      []
+    end
+
+    # Used to avoid errors in included associations parsing and to enable a
+    # insertion point for a change on splitting method.
+    def parsed_methods
+      params[:include].split(',').map do |param|
+        if @object.respond_to?(param)
+          param unless associations_array.include?(param)
+        end
+      end.compact
     rescue NoMethodError
       []
     end
@@ -85,7 +106,9 @@ module Apicasso
     # Used to avoid errors in fieldset selection parsing and to enable a
     # insertion point for a change on splitting method.
     def parsed_select
-      params[:select].split(',')
+      params[:select].split(',').map do |field|
+        field if @records.column_names.include?(field)
+      end
     rescue NoMethodError
       []
     end
