@@ -1,5 +1,5 @@
 .bundle/
-log/*.log
+*.log
 *.gem
 /.bundle/
 /.yardoc
@@ -9,6 +9,8 @@ log/*.log
 /pkg/
 /spec/reports/
 /tmp/
+/dummy/log/*.log
+.byebug_history
 
 # rspec failure tracking
 .rspec_status

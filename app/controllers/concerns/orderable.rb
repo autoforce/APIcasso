@@ -16,7 +16,7 @@ module Orderable
     # Usage:
     # Order.order(ordering_params(params))
     ordering = {}
-    params[:sort].try(:split, ',').try(:each) do |attr|
+    params[:sort]&.delete(' ').try(:split, ',').try(:each) do |attr|
       parsed_attr = parse_attr attr
       if model.attribute_names.include?(parsed_attr)
         ordering[parsed_attr] = SORT_ORDER[parse_sign attr]
@@ -30,13 +30,13 @@ module Orderable
   # Parsing of attributes to avoid empty starts in case browser passes "+" as " "
   def parse_attr(attr)
     return attr.gsub(/^\ (.*)/, '\1') if attr.starts_with?(' ')
-    return attr[1..-1] if attr.match?(/\A[+-]/)
+    return attr[1..-1] unless attr.match(/\A[+-]/).nil?
     attr
   end
 
   # Ordering sign parse, which separates
   def parse_sign(attr)
-    attr.match?(/\A[+-]/) ? attr.slice!(0) : '+'
+    attr.match(/\A[+-]/).nil? ? '+': attr.slice!(0)
   end
 
   def model

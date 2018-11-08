@@ -29,50 +29,6 @@ module Apicasso
         validated_attrs_for(:presence)
       end
     end
-    included do
-      include ::Swagger::Blocks
-      @@klass = self
-      swagger_schema @@klass.name.to_sym do
-        key :required, %i[*presence_validators] if @@klass.presence_validators?
-        @@klass.columns_hash.each do |name, type|
-          property name.to_sym do
-            key :type, type.type
-          end
-        end
-      end
-      swagger_schema "#{@@klass.name}Input".to_sym do
-        allOf do
-          schema do
-            key :'$ref', "#{@@klass.name}Input".to_sym
-          end
-          schema do
-            key :required, %i[*presence_validators] if @@klass.presence_validators?
-            @@klass.columns_hash.each do |name, type|
-              property name.to_sym do
-                key :type, type.type
-              end
-            end
-          end
-        end
-      end
-      swagger_schema "#{@@klass.name}Metadata".to_sym do
-        allOf do
-          schema do
-            key :'$ref', "#{@@klass.name}Metadata".to_sym
-          end
-          schema do
-            @@klass.columns_hash.each do |name, type|
-              property name.to_sym do
-                key :description, type.type
-                key :type, :string
-              end
-            end
-          end
-        end
-      end
-    rescue ActiveRecord::ConnectionNotEstablished
-      puts "No database connection to setup APIcasso routes in documentation"
-    end
   end
 end
 
