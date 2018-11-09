@@ -1,9 +1,22 @@
 <img src="https://raw.githubusercontent.com/ErvalhouS/APIcasso/master/APIcasso.png" width="300" /> [![Gem Version](https://badge.fury.io/rb/apicasso.svg)](https://badge.fury.io/rb/apicasso) [![Docs Coverage](https://inch-ci.org/github/autoforce/APIcasso.svg?branch=master)](https://inch-ci.org/github/autoforce/APIcasso.svg?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/b58bbd6b9a0376f7cfc8/maintainability)](https://codeclimate.com/github/autoforce/APIcasso/maintainability) [![codecov](https://codecov.io/gh/autoforce/APIcasso/branch/master/graph/badge.svg)](https://codecov.io/gh/autoforce/APIcasso) [![Build Status](https://travis-ci.org/autoforce/APIcasso.svg?branch=master)](https://travis-ci.org/autoforce/APIcasso)
 
-JSON API development can get boring and time consuming. If you think it through, every time you make one you use almost the same route structure, pointing to the same controller actions, with the same ordering, filtering and pagination features.
+Create APIs in a fast and dynamic way, without the need to develop everything from scratch. You just need to create your models and let **APIcasso** do the rest for you. It is the perfect candidate to make your project development go faster or for legacy Rails projects that do not have an API.
 
-**APIcasso** is intended to be used as a full-fledged CRUD JSON API or as a base controller to speed-up development.
-It is a route-based resource abstraction using API key scoping. This makes it possible to make CRUD-only applications just by creating functional Rails' models. It is a perfect candidate for legacy Rails projects that do not have an API. Access to your application's resources is managed by a `.scope` JSON object per API key. It uses that permission scope to restrict and extend access.
+If you think it through, JSON API development can get boring and time consuming. Every time you use almost the same route structure, pointing to the same controller actions, with the same ordering, filtering and pagination features.
+
+**APIcasso** is intended to be used to speed-up development, acting as a full-fledged CRUD JSON API into all your models. It is a route-based abstraction that lets you create, read, list, update or delete any `ActiveRecord` object in your application. This makes it possible to make CRUD-only applications just by creating functional Rails' models. Access to your application's resources is managed by a `.scope` JSON object per API key. It uses that permission scope to restrict and extend access.
+
+You can make your own API with only 4 steps:
+
+### Step 1
+ Create your models
+### Step 2
+ Insert **APIcasso** engine into your routes
+### Step 3
+ [Create an Apicasso::Key](https://github.com/autoforce/APIcasso#authorization)
+### Step 4
+ Profit! :crown: Consume your REST API
+
 
 # Installation
 
@@ -81,7 +94,7 @@ This way you enjoy all our object finder, authorization and authentication featu
 
 > But exposing my models to the internet is permissive as hell! Haven't you thought about security?
 
-_Sure!_ The **APIcasso** suite is exposing your application using authentication through `Authorization: Token` [HTTP header authentication](http://tools.ietf.org/html/draft-hammer-http-token-auth-01). The API key objects are manageable through the `Apicasso::Key` model, which gets setup at install. When a new key is created a `.token` is generated using an [Universally Unique Identifier(RFC 4122)](https://tools.ietf.org/html/rfc4122). A authenticated request looks like this:
+_Sure!_ The **APIcasso** suite is exposing your application using authentication through `Authorization: Token` [HTTP header authentication](http://tools.ietf.org/html/draft-hammer-http-token-auth-01). The API key objects are manageable through the `Apicasso::Key` model, which gets setup at install. When a new key is created a `.token` is generated using an [Universally Unique Identifier(RFC 4122)](https://tools.ietf.org/html/rfc4122). An authenticated request looks like this:
 
 ```
 curl -X GET \
