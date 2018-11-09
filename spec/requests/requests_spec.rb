@@ -15,7 +15,7 @@ RSpec.describe 'Used Model requests', type: :request do
       it 'returns status ok' do
         expect(response).to have_http_status(:ok)
       end
-      it 'returns all UsedModel' do
+      it 'returns UsedModel records equal to WillPaginate.per_page or all UsedModels' do
         if JSON.parse(response.body)['last_page'] == false
           expect(JSON.parse(response.body)['entries'].size).to eq(WillPaginate.per_page)
         else
@@ -38,7 +38,7 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     context 'with pagination' do
-      per_page = (1..UsedModel.all.size).to_a.sample
+      per_page = (1..UsedModel.count+1).to_a.sample
       page = (1..5).to_a.sample
 
       before(:all) do
@@ -199,7 +199,6 @@ RSpec.describe 'Used Model requests', type: :request do
       end
 
       it 'returns status created' do
-        byebug if response.status == 422
         expect(response).to have_http_status(:created)
       end
 

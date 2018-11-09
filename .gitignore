@@ -9,7 +9,7 @@ log/*.log
 /pkg/
 /spec/reports/
 /tmp/
-/dummy/log/*.log
+/spec/dummy/log/*.log
 .byebug_history
 
 # rspec failure tracking
