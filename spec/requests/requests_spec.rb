@@ -15,7 +15,7 @@ RSpec.describe 'Used Model requests', type: :request do
       it 'returns status ok' do
         expect(response).to have_http_status(:ok)
       end
-      it 'returns all UsedModel' do
+      it 'returns UsedModel records equal to WillPaginate.per_page or all UsedModels' do
         if JSON.parse(response.body)['last_page'] == false
           expect(JSON.parse(response.body)['entries'].size).to eq(WillPaginate.per_page)
         else
