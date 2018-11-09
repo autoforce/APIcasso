@@ -3,7 +3,7 @@ class UsedModel < ApplicationRecord
 
   validates :account_id, presence: true
   validates :unit_id, presence: true
-  validates :slug, presence: true, uniqueness: true
+  validates :slug, presence: true
 
   has_one_attached :file_highlighted
   has_many_attached :files
