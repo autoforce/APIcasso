@@ -57,6 +57,7 @@ GEM
       public_suffix (>= 2.0.2, < 4.0)
     arel (9.0.0)
     builder (3.2.3)
+    byebug (10.0.2)
     cancancan (2.3.0)
     capybara (3.10.1)
       addressable
@@ -176,6 +177,7 @@ PLATFORMS
 DEPENDENCIES
   apicasso!
   bundler
+  byebug
   capybara
   factory_bot_rails
   faker
