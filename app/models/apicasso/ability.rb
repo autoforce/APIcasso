@@ -5,6 +5,7 @@ module Apicasso
   class Ability
     include CanCan::Ability
 
+    # Method that initializes CanCanCan with the scope of permissions
     def initialize(key)
       key ||= Apicasso::Key.new
       cannot :manage, :all

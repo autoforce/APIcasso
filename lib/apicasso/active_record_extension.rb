@@ -8,7 +8,9 @@ module Apicasso
   # own application.
   module ActiveRecordExtension
     extend ActiveSupport::Concern
+    # Module with class methods of Apicasso
     module ClassMethods
+      # Method that validate ActiveRecord
       def validated_attrs_for(validation)
         if validation.is_a?(String) || validation.is_a?(Symbol)
           klass = 'ActiveRecord::Validations::' \
@@ -25,6 +27,7 @@ module Apicasso
         presence_validators.present?
       end
 
+      # Method that check presense of validators
       def presence_validators
         validated_attrs_for(:presence)
       end

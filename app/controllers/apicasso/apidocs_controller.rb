@@ -8,6 +8,7 @@ module Apicasso
 
     include Swagger::Blocks
 
+    # Definitions of Application
     swagger_root do
       MODELS_EXCLUDED = [
         'ApplicationRecord',
@@ -32,6 +33,7 @@ module Apicasso
           key :name, I18n.t('application.license')
         end
       end
+      # Definitions of models from Application
       ActiveRecord::Base.descendants.each do |model|
         next if MODELS_EXCLUDED.include?(model.name) || model.abstract_class
 
@@ -54,8 +56,8 @@ module Apicasso
 
     # Eager load application to be able to list all models
     Rails.application.eager_load! unless Rails.configuration.cache_classes
-    # A list of all classes that have swagger_* declarations, which gets injected
-    # by this gem in all `ActiveRecord::Base` classes
+    # A list of all classes that have swagger_* declarations, which gets
+    # injected by this gem in all `ActiveRecord::Base` classes
     SWAGGERED_CLASSES = [
       *ActiveRecord::Base.descendants,
       self
@@ -75,6 +77,7 @@ module Apicasso
       end
     end
 
+    # Generate metadata to each class of application
     SWAGGERED_CLASSES.each do |klass|
       next if MODELS_EXCLUDED.include?(klass.name) || klass.abstract_class
 
@@ -118,77 +121,22 @@ module Apicasso
       end
     end
 
+    # Builds JSON of definitions with operations from which model
     ActiveRecord::Base.descendants.each do |model|
-      next if MODELS_EXCLUDED.include?(model.name) || model.abstract_class
-
-      swagger_path "/#{model.name.underscore}" do
-        operation :get do
-          key :summary, I18n.t("activerecord.models.#{model.name.underscore}.index.summary", default: model.name)
-          key :description, I18n.t("activerecord.models.#{model.name.underscore}.index.description", default: model.name)
-          key :operationId, "find#{model.name.pluralize}"
-          key :produces, ['application/json']
-          key :tags, [model.name.underscore]
-          parameter do
-            key :name, :sort
-            key :in, :query
-            key :description, I18n.t('apicasso.sort.description',
-                                    default: 'Parameters sorting splitted by `,` preffixed by `+` or `-` which translates into ascending or descending order')
-            key :required, false
-            key :type, :string
-            key :collectionFormat, :json
-          end
-          parameter do
-            key :name, :q
-            key :in, :query
-            key :description, I18n.t('apicasso.q.description',
-                                    default: 'Records filtering by attribute and search query as affix. Usage: `?q[{attribute}{search_affix}]={matcher}`. All available search affixes are listed on: https://github.com/activerecord-hackery/ransack#search-matchers')
-            key :required, false
-            key :type, :json
-          end
-          parameter do
-            key :name, :page
-            key :in, :query
-            key :description, I18n.t('apicasso.page.description',
-                                    default: 'Records pagination paging, which offsets collection based on `params[:per_page]`')
-            key :required, false
-            key :type, :integer
-          end
-          parameter do
-            key :name, :per_page
-            key :in, :query
-            key :description, I18n.t('apicasso.per_page.description',
-                                    default: 'Records pagination size, which sets how many records will be rendered per request')
-            key :required, false
-            key :type, :integer
-          end
-          response 200 do
-            key :description, I18n.t("activerecord.models.#{model.name.underscore}.index.response",
-                                    default: "#{model.name} response, which include records matching current query and pagination metadata")
-            schema do
-              key :name, :total
-              key :description, I18n.t('apicasso.total.description',
-                                      default: 'Total records contained in current collection, as if there was no pagination.')
-              key :required, true
-              key :type, :integer
-            end
-            schema do
-              key :name, :total_pages
-              key :description, I18n.t('apicasso.total_pages.description',
-                                      default: 'How many pages of data the current collection has.')
-              key :required, true
-              key :type, :integer
-            end
-            schema do
-              key :name, :last_page
-              key :description, I18n.t('apicasso.last_page.description',
-                                      default: 'An indication if current request is the last to paginate in the current collection')
-              key :required, true
-              key :type, :boolean
-            end
-            schema do
-              key :name, :previous_page
-              key :description, I18n.t('apicasso.previous_page.description',
-                                      default: "The link of the previous page for the current collection. It can be null if there isn't any")
+      unless MODELS_EXCLUDED.include?(model)
+        # Resource definitions of GET, OPTIONS, POST
+        swagger_path "/#{model.name.underscore}" do
+          operation :get do
+            key :summary, I18n.t("activerecord.models.#{model.name.underscore}.index.summary", default: model.name)
+            key :description, I18n.t("activerecord.models.#{model.name.underscore}.index.description", default: model.name)
+            key :operationId, "find#{model.name.pluralize}"
+            key :produces, ['application/json']
+            key :tags, [model.name.underscore]
+            parameter do
+              key :name, :sort
+              key :in, :query
+              key :description, I18n.t('apicasso.sort.description',
+                                      default: 'Parameters sorting splitted by `,` preffixed by `+` or `-` which translates into ascending or descending order')
               key :required, false
               key :type, :string
             end
@@ -263,22 +211,33 @@ module Apicasso
             end
           end
         end
-      end
-      swagger_path "/#{model.name.underscore}/{id}" do
-        operation :patch do
-          key :description, I18n.t("activerecord.models.#{model.name.underscore}.update.response",
-                                  default: "Updates a #{model.name}")
-          key :operationId, "edit#{model.name}"
-          key :produces, ['application/json']
-          key :tags, [model.name.underscore]
-          parameter do
-            key :name, :id
-            key :in, :path
-            key :description, I18n.t("activerecord.models.attributes.#{model.name.underscore}.id",
-                                    default: "ID of #{model.name} to update on the application")
-            key :required, true
-            schema do
-              key :'$ref', "#{model.name}".to_sym
+        # Resource definitions of PATCH, GET, DELETE
+        swagger_path "/#{model.name.underscore}/{id}" do
+          operation :patch do
+            key :description, I18n.t("activerecord.models.#{model.name.underscore}.update.response",
+                                    default: "Updates a #{model.name}")
+            key :operationId, "edit#{model.name}"
+            key :produces, ['application/json']
+            key :tags, [model.name.underscore]
+            parameter do
+              key :name, :id
+              key :in, :path
+              key :description, I18n.t("activerecord.models.attributes.#{model.name.underscore}.id",
+                                      default: "ID of #{model.name} to update on the application")
+              key :required, true
+              schema do
+                key :'$ref', "#{model.name}".to_sym
+              end
+            end
+            parameter do
+              key :name, model.name.underscore.to_sym
+              key :in, :body
+              key :description, I18n.t("activerecord.models.#{model.name.underscore}.update.description",
+                                      default: "Existing #{model.name} to update on the application")
+              key :required, true
+              schema do
+                key :'$ref', "#{model.name}".to_sym
+              end
             end
           end
           parameter do
@@ -346,78 +305,24 @@ module Apicasso
         end
       end
 
-      model.reflect_on_all_associations.map(&:name).each do |association|
-        inner_name = association.to_s.classify
-        unless ASSOCIATION_EXCLUDED.include?(inner_name)
-          inner_klass = begin inner_name.constantize rescue NameError; false end
-          swagger_path "/#{model.name.underscore}/{id}/#{association}" do
-            operation :get do
-              key :summary, I18n.t("activerecord.models.#{inner_name.underscore}.index.summary", default: inner_name)
-              key :description, I18n.t("activerecord.models.#{inner_name.underscore}.index.description", default: inner_name)
-              key :operationId, "find#{inner_name.pluralize}"
-              key :produces, ['application/json']
-              key :tags, [inner_name.underscore]
-              parameter do
-                key :name, :sort
-                key :in, :query
-                key :description, I18n.t('apicasso.sort.description',
-                                        default: 'Parameters sorting splitted by `,` preffixed by `+` or `-` which translates into ascending or descending order')
-                key :required, false
-                key :type, :string
-                key :collectionFormat, :json
-              end
-              parameter do
-                key :name, :q
-                key :in, :query
-                key :description, I18n.t('apicasso.q.description',
-                                        default: 'Records filtering by attribute and search query as affix. Usage: `?q[{attribute}{search_affix}]={matcher}`. All available search affixes are listed on: https://github.com/activerecord-hackery/ransack#search-matchers')
-                key :required, false
-                key :type, :json
-              end
-              parameter do
-                key :name, :page
-                key :in, :query
-                key :description, I18n.t('apicasso.page.description',
-                                        default: 'Records pagination paging, which offsets collection based on `params[:per_page]`')
-                key :required, false
-                key :type, :integer
-              end
-              parameter do
-                key :name, :per_page
-                key :in, :query
-                key :description, I18n.t('apicasso.per_page.description',
-                                        default: 'Records pagination size, which sets how many records will be rendered per request')
-                key :required, false
-                key :type, :integer
-              end
-              response 200 do
-                key :description, I18n.t("activerecord.models.#{inner_name.underscore}.index.response",
-                                        default: "#{inner_name} response, which include records matching current query and pagination metadata")
-                schema do
-                  key :name, :total
-                  key :description, I18n.t('apicasso.total.description',
-                                          default: 'Total records contained in current collection, as if there was no pagination.')
-                  key :required, true
-                  key :type, :integer
-                end
-                schema do
-                  key :name, :total_pages
-                  key :description, I18n.t('apicasso.total_pages.description',
-                                          default: 'How many pages of data the current collection has.')
-                  key :required, true
-                  key :type, :integer
-                end
-                schema do
-                  key :name, :last_page
-                  key :description, I18n.t('apicasso.last_page.description',
-                                          default: 'An indication if current request is the last to paginate in the current collection')
-                  key :required, true
-                  key :type, :boolean
-                end
-                schema do
-                  key :name, :previous_page
-                  key :description, I18n.t('apicasso.previous_page.description',
-                                          default: "The link of the previous page for the current collection. It can be null if there isn't any")
+        # Resource's associations definitions
+        model.reflect_on_all_associations.map(&:name).each do |association|
+          inner_name = model.reflect_on_all_associations.select{ |ass| ass.name == association }.first.class_name
+          ASSOCIATION_EXCLUDED = ['ActiveStorage::Attachment', 'ActiveStorage::Blob'].freeze
+          unless ASSOCIATION_EXCLUDED.include?(inner_name)
+            inner_klass = begin inner_name.constantize rescue NameError; false end
+            swagger_path "/#{model.name.underscore}/{id}/#{association}" do
+              operation :get do
+                key :summary, I18n.t("activerecord.models.#{inner_name.underscore}.index.summary", default: inner_name)
+                key :description, I18n.t("activerecord.models.#{inner_name.underscore}.index.description", default: inner_name)
+                key :operationId, "find#{inner_name.pluralize}"
+                key :produces, ['application/json']
+                key :tags, [inner_name.underscore]
+                parameter do
+                  key :name, :sort
+                  key :in, :query
+                  key :description, I18n.t('apicasso.sort.description',
+                                          default: 'Parameters sorting splitted by `,` preffixed by `+` or `-` which translates into ascending or descending order')
                   key :required, false
                   key :type, :string
                 end
@@ -487,6 +392,7 @@ module Apicasso
       end
     end
 
+    # Method that generates Swagger JSON
     def index
       render json: Swagger::Blocks.build_root_json(SWAGGERED_CLASSES).to_json
     end
