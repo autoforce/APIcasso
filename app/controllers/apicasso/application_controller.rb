@@ -154,11 +154,16 @@ module Apicasso
     # @TODO
     # Remove this in favor of a more controllable aproach of CORS
     def set_access_control_headers
-      response.headers['Access-Control-Allow-Origin'] = request.headers["Origin"]
+      response.headers['Access-Control-Allow-Origin'] = allow_origin
       response.headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, PATCH, DELETE, OPTIONS'
       response.headers['Access-Control-Allow-Credentials'] = 'true'
       response.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization, Token, Auth-Token, Email, X-User-Token, X-User-Email'
       response.headers['Access-Control-Max-Age'] = '1728000'
+    end
+
+    # A method to allow origin customizing through method overriding
+    def allow_origin
+      request.headers['Referer'] || request.headers['Origin'] || '*'
     end
 
     # Checks if current request is a CORS preflight check
