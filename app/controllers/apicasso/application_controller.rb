@@ -163,7 +163,11 @@ module Apicasso
 
     # A method to allow origin customizing through method overriding
     def allow_origin
-      request.headers['Referer'] || request.headers['Origin'] || '*'
+      if request.headers['Referer'].present?
+        request.protocol + URI(request.headers['Referer']).host
+      else
+        request.headers['Origin'] || '*'
+      end
     end
 
     # Checks if current request is a CORS preflight check
