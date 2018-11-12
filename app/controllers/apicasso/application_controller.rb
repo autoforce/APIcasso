@@ -167,7 +167,7 @@ module Apicasso
         request.protocol + URI(request.headers['Referer']).host
       else
         request.headers['Origin'] || '*'
-      end
+      end.gsub(/\/$/, '')
     end
 
     # Checks if current request is a CORS preflight check
