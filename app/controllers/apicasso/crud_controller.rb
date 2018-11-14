@@ -98,6 +98,7 @@ module Apicasso
 
     # Setup to stablish the nested model to be queried
     def set_nested_resource
+      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(@object, params[:nested])
       @nested_resource = @object.send(params[:nested].underscore.pluralize)
     end
 
@@ -152,12 +153,20 @@ module Apicasso
     # or a grouped count of attributes
     def index_json
       if params[:group].present?
+        raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(@records, params[:group][:by], params[:group][:fields])
         @records.group(params[:group][:by].split(','))
                 .send(:calculate,
                       params[:group][:calculate],
                       params[:group][:field])
       else
         collection_response
+      end
+    end
+
+    # Check if request it's a sql injection
+    def sql_injection(objects, *parameters)
+      parameters.each do |parameter|
+        false unless objects.column_names.include?(parameter)
       end
     end
 

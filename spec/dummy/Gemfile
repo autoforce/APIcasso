@@ -31,7 +31,7 @@ gem 'bootsnap', '>= 1.1.0', require: false
 # gem 'cancancan'
 # gem 'ransack'
 # gem 'will_paginate'
-gem 'apicasso'
+gem 'apicasso', path: '../apicasso'
 gem 'redis-rails'
 gem 'redis-namespace'
 gem 'active_model_serializers'

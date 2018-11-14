@@ -7,6 +7,7 @@ module Apicasso
   class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
     prepend_before_action :restrict_access, unless: -> { preflight? }
+    prepend_before_action :request_klass
     before_action :set_access_control_headers
     after_action :register_api_request
 
@@ -141,6 +142,23 @@ module Apicasso
       query['page'] = records.previous_page
       uri.query = Rack::Utils.build_query(query)
       uri.to_s
+    end
+
+    Rails.application.eager_load!
+    DESCENDANTS_UNDERSCORED = ActiveRecord::Base.descendants.map { |d| d.to_s.underscore }
+    # Check for a bad request to be more security
+    def request_klass
+      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless descendants_included?
+    end
+
+    # Check if it's a descendant model allowed
+    def descendants_included?
+      DESCENDANTS_UNDERSCORED.include?(param_attribute.to_s.underscore)
+    end
+
+    # Get param to be compared
+    def param_attribute
+      (params[:nested] || params[:resource] || controller_name).singularize
     end
 
     # Receives a `:action, :resource, :object` hash to validate authorization
