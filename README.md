@@ -223,12 +223,10 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/Ervalh
 ### TODO
 
 - Add support to other databases
-- Abstract a configurable CORS approach, maybe using middleware
+- [Abstract a configurable CORS approach, maybe using middleware](https://github.com/autoforce/APIcasso/issues/22)
 - Add gem options like: Token rotation, Alternative authentication methods
 - Refine and document auto-documentation feature
 - Rate limiting
-- Testing suite
-- Travis CI
 
 # Code of conduct
 
