@@ -10,6 +10,8 @@
 /spec/reports/
 /tmp/
 /spec/dummy/log/*.log
+/spec/dummy/.byebug_history
+/spec/dummy/tmp
 .byebug_history
 
 # rspec failure tracking

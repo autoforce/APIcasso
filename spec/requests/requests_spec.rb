@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-
 RSpec.describe 'Used Model requests', type: :request do
   token = Apicasso::Key.create(scope: { manage: { used_model: true } }).token
   access_token = { 'AUTHORIZATION' => "Token token=#{token}" }
@@ -38,7 +37,7 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     context 'with pagination' do
-      per_page = (1..UsedModel.count+1).to_a.sample
+      per_page = (1..UsedModel.count + 1).to_a.sample
       page = (1..5).to_a.sample
 
       before(:all) do
@@ -72,16 +71,25 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     context 'by grouping' do
+      column_by, column_fields = [:active, :account_id, :unit_id, :brand, :name, :slug,
+        :model, :version, :model_year, :production_year, :kind, :new_vehicle, :old_price,
+        :price_value, :price, :category, :transmission, :km_value, :km, :plate, :color, :doors,
+        :fuel, :fuel_text, :shielded].sample(2)
+
       before(:all) do
-        get '/api/v1/used_model', params: { 'group[by]': 'brand', 'group[calculate]': 'count', 'group[fields]': 'transmission' }, headers: access_token
+        get '/api/v1/used_model', params: {
+          'group[by]': column_by,
+          'group[calculate]': 'count',
+          'group[fields]': column_fields
+        }, headers: access_token
       end
 
       it 'returns status ok' do
         expect(response).to have_http_status(:ok)
       end
 
-      it 'returns all records grouped brand queried' do
-        expect(JSON.parse(response.body)).to eq(UsedModel.group(:brand).count)
+      it 'returns all records grouped by field queried' do
+        expect(response.body).to eq(UsedModel.where("#{column_fields} is NOT NULL").group(column_by).count.to_json)
       end
     end
 
@@ -102,7 +110,10 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     context 'with field selecting' do
-      field_select = UsedModel.column_names.sample
+      fields = UsedModel.column_names
+      fields.delete('id')
+      field_select = fields.sample
+
       before(:all) do
         get '/api/v1/used_model', params: { 'select': field_select }, headers: access_token
       end
@@ -111,9 +122,9 @@ RSpec.describe 'Used Model requests', type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      it 'returns all records that have field queried' do
+      it 'returns all records with id (default) and that have field queried' do
         JSON.parse(response.body)['entries'].each do |record|
-          expect(record.keys).to include(field_select)
+          expect(record.keys).to eq(['id', field_select])
         end
       end
     end
@@ -195,7 +206,35 @@ RSpec.describe 'Used Model requests', type: :request do
     context 'with valid params' do
       before(:all) do
         @quantity = UsedModel.all.size
-        post '/api/v1/used_model/', params: { 'used_model': { 'name': 'test', 'account_id': 1, 'unit_id': 1, 'slug': slug_to_post, 'brand': 'BMW' }}, headers: access_token
+        slug_to_post = Faker::Lorem.word
+        post '/api/v1/used_model/', params: {
+          'used_model': {
+            'active': Faker::Boolean.boolean,
+            'account_id': Faker::Number.number(1),
+            'unit_id': Faker::Number.number(1),
+            'brand': Faker::Vehicle.make,
+            'name': Faker::Vehicle.make_and_model,
+            'model': Faker::Vehicle.model,
+            'slug': slug_to_post,
+            'version': Faker::Number.decimal(1, 1),
+            'model_year': Faker::Vehicle.year,
+            'production_year': Faker::Vehicle.year,
+            'kind': 'car',
+            'new_vehicle': Faker::Boolean.boolean,
+            'old_price': Faker::Number.decimal(4, 2).to_s,
+            'price_value': Faker::Number.decimal(4, 2),
+            'price': Faker::Number.decimal(4, 2).to_s,
+            'category': Faker::Vehicle.car_type,
+            'transmission': Faker::Vehicle.transmission,
+            'km_value': Faker::Number.number(8),
+            'km': Faker::Number.number(8),
+            'plate': Faker::Number.number(4),
+            'color': Faker::Vehicle.color,
+            'doors': Faker::Number.number(1),
+            'fuel':  Faker::Number.number(1),
+            'fuel_text': Faker::Vehicle.fuel_type,
+            'shielded': Faker::Boolean.boolean,
+          }}, headers: access_token
       end
 
       it 'returns status created' do
@@ -222,7 +261,6 @@ RSpec.describe 'Used Model requests', type: :request do
   describe 'PUT /api/v1/used_model/:id' do
     id_to_put = UsedModel.all.sample.id.to_s
     name_to_put = Faker::Lorem.word
-    slug_to_put = UsedModel.all.sample.slug
 
     context 'with valid params' do
       before(:all) do

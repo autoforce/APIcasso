@@ -93,7 +93,7 @@ module Apicasso
     rescue NoMethodError
       @object = resource.find(id)
     ensure
-      authorize! :read, @object
+      authorize! action_name.to_sym, @object
     end
 
     # Setup to stablish the nested model to be queried
