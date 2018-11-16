@@ -73,6 +73,7 @@ GEM
       url
     concurrent-ruby (1.1.3)
     crass (1.0.4)
+    database_cleaner (1.7.0)
     diff-lcs (1.3)
     docile (1.3.1)
     erubi (1.7.1)
@@ -196,6 +197,7 @@ DEPENDENCIES
   byebug
   capybara
   codecov
+  database_cleaner
   factory_bot_rails
   faker
   pg
