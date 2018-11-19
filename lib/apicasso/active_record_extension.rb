@@ -11,9 +11,8 @@ module Apicasso
     # Module with class methods of Apicasso
     module ClassMethods
       # Method that map validations for consumption on the Swagger JSON
-      # Returns: All validated attributes
-      # Parameter:
-      #   validation: It's a validator to be checked
+      # @param validation [Array] a validator to be checked
+      # @returns [Array] All validated attributes
       def validated_attrs_for(validation)
         if validation.is_a?(String) || validation.is_a?(Symbol)
           klass = 'ActiveRecord::Validations::' \

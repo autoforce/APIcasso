@@ -9,9 +9,8 @@ module Apicasso
       desc 'Add the required migrations to run APIcasso'
 
       # Method generates the next migration number
-      # Returns: The next migration number
-      # Parameter:
-      #   path: It's the path to migration directory
+      # @param path [String] the path to migration directory
+      # @returns [String] the next migration number
       def self.next_migration_number(path)
         if @prev_migration_nr
           @prev_migration_nr += 1
