@@ -98,7 +98,6 @@ module Apicasso
 
     # Setup to stablish the nested model to be queried
     def set_nested_resource
-      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(@object, params[:nested])
       @nested_resource = @object.send(params[:nested].underscore.pluralize)
     end
 
@@ -149,11 +148,11 @@ module Apicasso
       @records = @records.accessible_by(current_ability).unscope(:order)
     end
 
-    # The response for index action, which can be a pagination of a record collection
-    # or a grouped count of attributes
+    # The response for index action, which can be a pagination of a
+    # record collection or a grouped count of attributes
     def index_json
+      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(resource, params.to_unsafe_h)
       if params[:group].present?
-        raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(@records, params[:group][:by], params[:group][:fields])
         @records.group(params[:group][:by].split(','))
                 .send(:calculate,
                       params[:group][:calculate],
@@ -163,11 +162,39 @@ module Apicasso
       end
     end
 
-    # Check if request it's a sql injection
-    def sql_injection(objects, *parameters)
-      parameters.each do |parameter|
-        false unless objects.column_names.include?(parameter)
+    # Check if request is a sql injection
+    def sql_injection(klass, parameters={})
+      parameters = parameters.slice(:group, :resource, :nested, :sort, :include)
+      parameters.each do |key, value|
+        if key.to_sym == :group
+          return false unless group_sql_safe?(klass, value)
+        else
+          value.split(',').each do |param|
+            return false unless safe_for_sql?(klass, param.gsub(/\A[+-]/, ''))
+          end
+        end
       end
+    end
+
+    # Check if group params is safe for sql injection
+    def group_sql_safe?(klass, value)
+      group_calculate = %w[average calculate count ids maximum minimum pluck sum]
+      value.each do |group_key, group_value|
+        if group_key.to_sym == :calculate
+          return false unless group_calculate.include?(group_value)
+        else
+          return false unless safe_for_sql?(klass, group_value)
+        end
+      end
+      true
+    end
+
+    # Check if value for current class is valid for API consumption
+    def safe_for_sql?(klass, value)
+      klass.column_names.include?(value) ||
+        DESCENDANTS_UNDERSCORED.include?(value) ||
+        klass.new.respond_to?(value.to_sym) ||
+        klass.reflect_on_all_associations.map(&:name).include?(value.to_sym)
     end
 
     # The response for show action, which can be a fieldset

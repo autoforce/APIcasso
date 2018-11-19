@@ -145,19 +145,11 @@ RSpec.describe 'Used Model requests', type: :request do
       end
     end
 
-    context 'with include associations invalid' do
-      before(:all) do
-        get '/api/v1/used_model', params: { 'include': 'files,file' }, headers: access_token
-      end
-
-      it 'returns status ok' do
-        expect(response).to have_http_status(:ok)
-      end
-
-      it 'returns all records without includes queried' do
-        JSON.parse(response.body)['entries'].each do |record|
-          expect(record.keys).not_to include('files_blobs', 'files_url')
-        end
+    context 'when include invalid associations' do
+      it 'raise a bad request exception' do
+        expect {
+          get '/api/v1/used_model', params: { 'include': 'files,file' }, headers: access_token
+        }.to raise_exception(ActionController::BadRequest)
       end
     end
   end
