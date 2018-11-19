@@ -1,5 +1,4 @@
-# This class is injected into `ActiveRecord:Migration` to enable generated
-# automatically schema of the Apicasso tables
+# Migration from APIcasso tables
 class CreateApicassoTables < ActiveRecord::Migration[5.0]
   # Method that generates migration apicasso_keys and apicasso_keys tables
   def change
