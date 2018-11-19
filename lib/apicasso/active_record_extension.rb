@@ -8,7 +8,12 @@ module Apicasso
   # own application.
   module ActiveRecordExtension
     extend ActiveSupport::Concern
+    # Module with class methods of Apicasso
     module ClassMethods
+      # Method that map validations for consumption on the Swagger JSON
+      # Returns: All validated attributes
+      # Parameter:
+      #   validation: It's a validator to be checked
       def validated_attrs_for(validation)
         if validation.is_a?(String) || validation.is_a?(Symbol)
           klass = 'ActiveRecord::Validations::' \
@@ -25,6 +30,7 @@ module Apicasso
         presence_validators.present?
       end
 
+      # Method that lists all presence validators
       def presence_validators
         validated_attrs_for(:presence)
       end
