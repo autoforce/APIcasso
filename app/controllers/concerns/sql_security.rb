@@ -56,7 +56,7 @@ module SqlSecurity
   # Check if value for current class is valid for API consumption
   def safe_for_sql?(klass, value)
     klass.column_names.include?(value) ||
-      DESCENDANTS_UNDERSCORED.include?(value) ||
+      DESCENDANTS_UNDERSCORED.include?(value.singularize) ||
       klass.new.respond_to?(value) ||
       klass.reflect_on_all_associations.map(&:name).include?(value)
   end
