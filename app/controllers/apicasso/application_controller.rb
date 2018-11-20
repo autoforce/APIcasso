@@ -9,7 +9,10 @@ module Apicasso
     prepend_before_action :restrict_access, unless: -> { preflight? }
     prepend_before_action :klasses_allowed
     before_action :set_access_control_headers
+    before_action :set_root_resource
     after_action :register_api_request
+
+    include SqlSecurity
 
     # Sets the authorization scope for the current API key, it's a getter
     # to make scoping easier
@@ -66,6 +69,21 @@ module Apicasso
       }
     end
 
+    # Common setup to stablish which model is the resource of this request
+    def set_root_resource
+      @root_resource = params[:resource].classify.constantize
+    end
+
+    # Setup to stablish the nested model to be queried
+    def set_nested_resource
+      @nested_resource = @object.send(params[:nested].underscore.pluralize)
+    end
+
+    # Reutrns root_resource if nested_resource is not set scoped by permissions
+    def resource
+      (@nested_resource || @root_resource)
+    end
+
     # A method to extract all assosciations available
     def associations_array
       resource.reflect_on_all_associations.map { |association| association.name.to_s }
@@ -108,7 +126,7 @@ module Apicasso
     # insertion point for a change on splitting method.
     def parsed_select
       params[:select].split(',').map do |field|
-        field if @records.column_names.include?(field)
+        field if resource.column_names.include?(field)
       end
     rescue NoMethodError
       []
@@ -144,8 +162,6 @@ module Apicasso
       uri.to_s
     end
 
-    Rails.application.eager_load!
-    DESCENDANTS_UNDERSCORED = ActiveRecord::Base.descendants.map { |d| d.to_s.underscore }
     # Check for a bad request to be more secure
     def klasses_allowed
       raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless descendants_included?
@@ -158,7 +174,11 @@ module Apicasso
 
     # Get param to be compared
     def param_attribute
-      (params[:nested] || params[:resource] || controller_name).singularize
+      representative_resource.singularize
+    end
+
+    def representative_resource
+      (params[:nested] || params[:resource] || controller_name)
     end
 
     # Receives a `:action, :resource, :object` hash to validate authorization
