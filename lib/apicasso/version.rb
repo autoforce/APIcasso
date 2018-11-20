@@ -1,3 +1,3 @@
 module Apicasso
-  VERSION = '0.4.11'.freeze
+  VERSION = '0.5.0'.freeze
 end

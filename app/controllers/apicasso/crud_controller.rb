@@ -3,10 +3,9 @@
 module Apicasso
   # Controller to consume read-only data to be used on client's frontend
   class CrudController < Apicasso::ApplicationController
-    before_action :set_root_resource
     before_action :set_object, except: %i[index create schema]
     before_action :set_nested_resource, only: %i[nested_index]
-    before_action :set_records, only: %i[index nested_index]
+    before_action :set_records, only: %i[index]
     include Orderable
     # GET /:resource
     # Returns a paginated, ordered and filtered query based response.
@@ -81,11 +80,6 @@ module Apicasso
 
     private
 
-    # Common setup to stablish which model is the resource of this request
-    def set_root_resource
-      @root_resource = params[:resource].classify.constantize
-    end
-
     # Common setup to stablish which object this request is querying
     def set_object
       id = params[:id]
@@ -94,16 +88,6 @@ module Apicasso
       @object = resource.find(id)
     ensure
       authorize! action_name.to_sym, @object
-    end
-
-    # Setup to stablish the nested model to be queried
-    def set_nested_resource
-      @nested_resource = @object.send(params[:nested].underscore.pluralize)
-    end
-
-    # Reutrns root_resource if nested_resource is not set scoped by permissions
-    def resource
-      (@nested_resource || @root_resource)
     end
 
     # Used to setup the resource's schema, mapping attributes and it's types
@@ -148,8 +132,8 @@ module Apicasso
       @records = @records.accessible_by(current_ability).unscope(:order)
     end
 
-    # The response for index action, which can be a pagination of a record collection
-    # or a grouped count of attributes
+    # The response for index action, which can be a pagination of a
+    # record collection or a grouped count of attributes
     def index_json
       if params[:group].present?
         @records.group(params[:group][:by].split(','))

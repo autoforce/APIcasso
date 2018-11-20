@@ -145,19 +145,11 @@ RSpec.describe 'Used Model requests', type: :request do
       end
     end
 
-    context 'with include associations invalid' do
-      before(:all) do
-        get '/api/v1/used_model', params: { 'include': 'files,file' }, headers: access_token
-      end
-
-      it 'returns status ok' do
-        expect(response).to have_http_status(:ok)
-      end
-
-      it 'returns all records without includes queried' do
-        JSON.parse(response.body)['entries'].each do |record|
-          expect(record.keys).not_to include('files_blobs', 'files_url')
-        end
+    context 'when include invalid associations' do
+      it 'raise a bad request exception' do
+        expect {
+          get '/api/v1/used_model', params: { 'include': 'filess,filee' }, headers: access_token
+        }.to raise_exception(ActionController::BadRequest)
       end
     end
   end
@@ -178,6 +170,51 @@ RSpec.describe 'Used Model requests', type: :request do
 
     it 'return matches with object searched' do
       expect(UsedModel.find(id_to_get_id.to_i).attributes.to_json).to eq(response.body)
+    end
+
+    context 'with field selecting' do
+      id_to_get_id = UsedModel.all.sample.id.to_s
+      fields = UsedModel.column_names
+      fields.delete('id')
+      field_select = fields.sample
+
+      before(:all) do
+        get '/api/v1/used_model/' + id_to_get_id, params: { 'select': field_select }, headers: access_token
+      end
+
+      it 'returns status ok' do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it 'returns the record with id (default) and that have field queried' do
+        expect(JSON.parse(response.body).keys).to eq([field_select])
+      end
+    end
+
+    context 'with include associations valid' do
+      id_to_test = UsedModel.all.sample.id.to_s
+
+      before(:all) do
+        get '/api/v1/used_model/' + id_to_test, params: { 'include': 'files_blobs,files_url' }, headers: access_token
+      end
+
+      it 'returns status ok' do
+        expect(response).to have_http_status(:ok)
+      end
+
+      it 'returns the record with includes queried' do
+        expect(JSON.parse(response.body).keys).to include('files_blobs', 'files_url')
+      end
+    end
+
+    context 'when include invalid associations' do
+      id_to_test = UsedModel.all.sample.id.to_s
+
+      it 'raise a bad request exception' do
+        expect {
+          get '/api/v1/used_model/' + id_to_test, params: { 'include': 'filess,filee' }, headers: access_token
+        }.to raise_exception(ActionController::BadRequest)
+      end
     end
   end
 
