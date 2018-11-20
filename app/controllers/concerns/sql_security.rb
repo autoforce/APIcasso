@@ -62,6 +62,6 @@ module SqlSecurity
   end
 
   def apicasso_parameters
-    parameters.slice(:group, :resource, :nested, :sort, :include)
+    params.to_unsafe_h.slice(:group, :resource, :nested, :sort, :include)
   end
 end
