@@ -40,6 +40,6 @@ module Orderable
   end
 
   def model
-    (params[:nested] || params[:resource] || controller_name).classify.constantize
+    representative_resource.classify.constantize
   end
 end
