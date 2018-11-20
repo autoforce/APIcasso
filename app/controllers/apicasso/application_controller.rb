@@ -193,7 +193,7 @@ module Apicasso
     # Check for SQL injection before requests and
     # raise a exception when find
     def bad_request?
-      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(resource, params.to_unsafe_h)
+      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(resource)
     end
 
     # @TODO
