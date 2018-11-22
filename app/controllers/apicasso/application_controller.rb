@@ -6,9 +6,8 @@ module Apicasso
   # application needs to create custom actions.
   class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
-    prepend_before_action :restrict_access, unless: -> { preflight? }
+    prepend_before_action :restrict_access
     prepend_before_action :klasses_allowed
-    before_action :set_access_control_headers
     before_action :set_root_resource
     before_action :bad_request?
     after_action :register_api_request
@@ -194,31 +193,6 @@ module Apicasso
     # raise a exception when find
     def bad_request?
       raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(resource)
-    end
-
-    # @TODO
-    # Remove this in favor of a more controllable aproach of CORS
-    def set_access_control_headers
-      response.headers['Access-Control-Allow-Origin'] = allow_origin
-      response.headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, PATCH, DELETE, OPTIONS'
-      response.headers['Access-Control-Allow-Credentials'] = 'true'
-      response.headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization, Token, Auth-Token, Email, X-User-Token, X-User-Email'
-      response.headers['Access-Control-Max-Age'] = '1728000'
-    end
-
-    # A method to allow origin customizing through method overriding
-    def allow_origin
-      if request.headers['Referer'].present?
-        request.protocol + URI(request.headers['Referer']).host
-      else
-        request.headers['Origin'] || '*'
-      end.gsub(/\/$/, '')
-    end
-
-    # Checks if current request is a CORS preflight check
-    def preflight?
-      request.request_method == 'OPTIONS' &&
-        !request.headers['Authorization'].present?
     end
   end
 end

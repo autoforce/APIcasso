@@ -16,7 +16,6 @@ module Apicasso
     # Example:
     #   GET /sites?sort=+name,-updated_at&q[domain_eq]=domain.com&page=42&per_page=42
     def index
-      set_access_control_headers
       render json: index_json
     end
 
@@ -24,7 +23,6 @@ module Apicasso
     # Common behavior for showing a record, with an addition of
     # relation/methods including on response
     def show
-      set_access_control_headers
       render json: show_json
     end
 
@@ -75,7 +73,7 @@ module Apicasso
     # Will return a JSON with the schema of the current resource, using
     # attribute names as keys and attirbute types as values.
     def schema
-      render json: resource_schema.to_json unless preflight?
+      render json: resource_schema.to_json
     end
 
     private

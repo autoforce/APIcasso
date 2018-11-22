@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'cancancan', '~> 2.0'
   s.add_dependency 'friendly_id', '~> 5.2.0'
+  s.add_dependency 'rack-cors'
   s.add_dependency 'rails', '> 5'
   s.add_dependency 'ransack'
   s.add_dependency 'swagger-blocks'
