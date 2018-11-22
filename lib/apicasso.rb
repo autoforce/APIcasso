@@ -10,6 +10,23 @@ require 'apicasso/engine'
 require 'apicasso/active_record_extension'
 require 'friendly_id'
 
+require 'apicasso/configuration'
+
+# Load settings defined in initialier
 module Apicasso
-  # Your code goes here...
+  class << self
+    attr_accessor :configuration
+  end
+
+  def self.configuration
+    @configuration ||= Configuration.new
+  end
+
+  def self.reset
+    @configuration = Configuration.new
+  end
+
+  def self.configure
+    yield(configuration)
+  end
 end
