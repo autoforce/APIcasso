@@ -8,13 +8,13 @@ module Apicasso
       allow do
         origins Apicasso.configuration.origins
         resource Apicasso.configuration.resource,
-          headers: Apicasso.configuration.headers,
-          methods: Apicasso.configuration.methods,
-          credentials: Apicasso.configuration.credentials,
-          max_age: Apicasso.configuration.max_age,
-          if: Apicasso.configuration.if,
-          vary:  Apicasso.configuration.vary,
-          expose: Apicasso.configuration.expose
+                 headers: Apicasso.configuration.headers,
+                 methods: Apicasso.configuration.methods,
+                 credentials: Apicasso.configuration.credentials,
+                 max_age: Apicasso.configuration.max_age,
+                 if: Apicasso.configuration.if,
+                 vary:  Apicasso.configuration.vary,
+                 expose: Apicasso.configuration.expose
       end
     end
 
