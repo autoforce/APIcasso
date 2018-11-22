@@ -14,10 +14,6 @@ require 'apicasso/configuration'
 
 # Load settings defined in initializer
 module Apicasso
-  class << self
-    attr_accessor :configuration
-  end
-
   def self.configuration
     @configuration ||= Configuration.new
   end
