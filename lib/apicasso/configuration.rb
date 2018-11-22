@@ -1,7 +1,8 @@
 module Apicasso
+  # This class exposes the settable attributes of the gem
   class Configuration
-    attr_accessor :origins, :headers, :resource, :credentials, :methods,
-      :max_age, :expose, :if, :vary
+    attr_writer :origins, :headers, :resource, :credentials, :methods,
+                :max_age, :expose, :if, :vary
 
     def initialize
       @origins = nil
