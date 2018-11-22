@@ -26,6 +26,11 @@ module Apicasso
         migration_template 'create_apicasso_tables.rb',
                            'db/migrate/create_apicasso_tables.rb'
       end
+
+      # Create an initializer with CORS configuration to Apicasso
+      def copy_initializer
+        copy_file 'apicasso.rb', 'config/initalizers/apicasso.rb'
+      end
     end
   end
 end
