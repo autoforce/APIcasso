@@ -12,7 +12,7 @@ require 'friendly_id'
 
 require 'apicasso/configuration'
 
-# Load settings defined in initialier
+# Load settings defined in initializer
 module Apicasso
   class << self
     attr_accessor :configuration
