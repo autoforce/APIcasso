@@ -26,12 +26,12 @@ Apicasso.configure do |config|
   # Access-Control-Allow-Methods and Access-Control-Allow-Headers headers)
   # can be cached.
   # Must be a number
-  config.max_age = 1728000
+  config.max_age = 1_728_000
 
   # The Access-Control-Allow-Methods response header specifies the method or
   # methods allowed when accessing the resource in response to a request.
   # Cam be a string or array or :any
-  config.methods = [:get, :post, :delete, :put, :patch, :options]
+  config.methods = %i[get post delete put patch options]
 
   # The Vary HTTP response header determines how to match future request headers
   # to decide whether a cached response can be used rather than requesting a
