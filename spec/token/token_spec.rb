@@ -318,5 +318,23 @@ RSpec.describe 'Apicasso Keys', type: :request do
         expect(UsedModel.all.size).to eq(size_before - 1)
       end
     end
+
+    context 'with a false key' do
+      access_token = { 'AUTHORIZATION' => "Token token=notavalidtoken" }
+
+      it 'returns unauthorized to request' do
+        get '/api/v1/used_model', headers: access_token
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'with an empty key' do
+      access_token = { 'AUTHORIZATION' => "Token token=" }
+
+      it 'returns unauthorized to request' do
+        get '/api/v1/used_model', headers: access_token
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
   end
 end
