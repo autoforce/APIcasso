@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-RSpec.describe 'Used Model plurarized requests', type: :request do
+RSpec.describe 'Used Model requests', type: :request do
   token = Apicasso::Key.create(scope: { manage: { used_model: true } }).token
   access_token = { 'AUTHORIZATION' => "Token token=#{token}" }
 
@@ -155,9 +155,8 @@ RSpec.describe 'Used Model plurarized requests', type: :request do
   end
 
   describe 'GET /api/v1/used_models/:id' do
-    id_to_get_id = UsedModel.all.sample.id.to_s
     before(:all) do
-      get '/api/v1/used_models/' + id_to_get_id, headers: access_token
+      get '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, headers: access_token
     end
 
     it 'returns status ok' do
@@ -169,17 +168,16 @@ RSpec.describe 'Used Model plurarized requests', type: :request do
     end
 
     it 'return matches with object searched' do
-      expect(UsedModel.find(id_to_get_id.to_i).attributes.to_json).to eq(response.body)
+      expect(UsedModel.find(JSON.parse(response.body)['id']).attributes.to_json).to eq(response.body)
     end
 
     context 'with field selecting' do
-      id_to_get_id = UsedModel.all.sample.id.to_s
       fields = UsedModel.column_names
       fields.delete('id')
       field_select = fields.sample
 
       before(:all) do
-        get '/api/v1/used_models/' + id_to_get_id, params: { 'select': field_select }, headers: access_token
+        get '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'select': field_select }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -192,10 +190,8 @@ RSpec.describe 'Used Model plurarized requests', type: :request do
     end
 
     context 'with include associations valid' do
-      id_to_test = UsedModel.all.sample.id.to_s
-
       before(:all) do
-        get '/api/v1/used_models/' + id_to_test, params: { 'include': 'files_blobs,files_url' }, headers: access_token
+        get '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'include': 'files_blobs,files_url' }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -208,20 +204,17 @@ RSpec.describe 'Used Model plurarized requests', type: :request do
     end
 
     context 'when include invalid associations' do
-      id_to_test = UsedModel.all.sample.id.to_s
-
       it 'raise a bad request exception' do
         expect {
-          get '/api/v1/used_models/' + id_to_test, params: { 'include': 'filess,filee' }, headers: access_token
+          get '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'include': 'filess,filee' }, headers: access_token
         }.to raise_exception(ActionController::BadRequest)
       end
     end
   end
 
   describe 'GET /api/v1/used_models/:slug' do
-    id_to_get_slug = UsedModel.all.sample.slug.to_s
     before(:all) do
-      get '/api/v1/used_models/' + id_to_get_slug, headers: access_token
+      get '/api/v1/used_models/' + UsedModel.all.sample.slug.to_s, headers: access_token
     end
 
     it 'returns status ok' do
@@ -233,7 +226,7 @@ RSpec.describe 'Used Model plurarized requests', type: :request do
     end
 
     it 'return matches with object searched' do
-      expect(UsedModel.friendly.find(id_to_get_slug).attributes.to_json).to eq(response.body)
+      expect(UsedModel.friendly.find(JSON.parse(response.body)['slug']).attributes.to_json).to eq(response.body)
     end
   end
 
@@ -296,12 +289,11 @@ RSpec.describe 'Used Model plurarized requests', type: :request do
   end
 
   describe 'PUT /api/v1/used_models/:id' do
-    id_to_put = UsedModel.all.sample.id.to_s
     name_to_put = Faker::Lorem.word
 
     context 'with valid params' do
       before(:all) do
-        patch '/api/v1/used_models/' + id_to_put, params: { 'used_model': { 'name': name_to_put }}, headers: access_token
+        patch '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'used_model': { 'name': name_to_put }}, headers: access_token
       end
 
       it 'returns status ok' do
@@ -309,25 +301,24 @@ RSpec.describe 'Used Model plurarized requests', type: :request do
       end
 
       it 'updates requested record' do
-        expect(UsedModel.find(id_to_put).name).to eq(name_to_put)
+        expect(UsedModel.find(JSON.parse(response.body)['id']).name).to eq(name_to_put)
       end
     end
 
     context 'with invalid params' do
       it 'return a error' do
-        patch '/api/v1/used_models/' + id_to_put, params: { 'used_model': { 'unit_id': nil }}, headers: access_token
+        patch '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'used_model': { 'unit_id': nil }}, headers: access_token
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
 
   describe 'DELETE /api/v1/used_models/:id' do
-    id_to_del = UsedModel.all.sample.id.to_s
-
     context 'with valid params' do
       before(:all) do
         @quantity = UsedModel.all.size
-        delete '/api/v1/used_models/' + id_to_del, headers: access_token
+        @id_to_del = UsedModel.all.sample.id.to_s
+        delete '/api/v1/used_models/' + @id_to_del, headers: access_token
       end
 
       it 'returns status no content' do
@@ -339,7 +330,7 @@ RSpec.describe 'Used Model plurarized requests', type: :request do
       end
 
       it 'check if record was deleted' do
-        expect{ UsedModel.find(id_to_del.to_i) }.to raise_exception(ActiveRecord::RecordNotFound)
+        expect{ UsedModel.find(@id_to_del.to_i) }.to raise_exception(ActiveRecord::RecordNotFound)
       end
     end
   end
