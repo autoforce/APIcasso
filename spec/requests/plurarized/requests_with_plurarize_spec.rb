@@ -5,10 +5,10 @@ RSpec.describe 'Used Model requests', type: :request do
   token = Apicasso::Key.create(scope: { manage: { used_model: true } }).token
   access_token = { 'AUTHORIZATION' => "Token token=#{token}" }
 
-  describe 'GET /api/v1/used_model' do
+  describe 'GET /api/v1/used_models' do
     context 'with default pagination' do
       before(:all) do
-        get '/api/v1/used_model', headers: access_token
+        get '/api/v1/used_models', headers: access_token
       end
 
       it 'returns status ok' do
@@ -25,7 +25,7 @@ RSpec.describe 'Used Model requests', type: :request do
 
     context 'with negative pagination' do
       before(:all) do
-        get '/api/v1/used_model', params: { per_page: -1 }, headers: access_token
+        get '/api/v1/used_models', params: { per_page: -1 }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -41,7 +41,7 @@ RSpec.describe 'Used Model requests', type: :request do
       page = (1..5).to_a.sample
 
       before(:all) do
-        get '/api/v1/used_model', params: { per_page: per_page, page: page }, headers: access_token
+        get '/api/v1/used_models', params: { per_page: per_page, page: page }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -56,7 +56,7 @@ RSpec.describe 'Used Model requests', type: :request do
     context 'by searching' do
       brand_to_search = UsedModel.all.sample.brand
       before(:all) do
-        get '/api/v1/used_model', params: { 'q[brand_matches]': brand_to_search }, headers: access_token
+        get '/api/v1/used_models', params: { 'q[brand_matches]': brand_to_search }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -77,7 +77,7 @@ RSpec.describe 'Used Model requests', type: :request do
         :fuel, :fuel_text, :shielded].sample(2)
 
       before(:all) do
-        get '/api/v1/used_model', params: {
+        get '/api/v1/used_models', params: {
           'group[by]': column_by,
           'group[calculate]': 'count',
           'group[fields]': column_fields
@@ -95,7 +95,7 @@ RSpec.describe 'Used Model requests', type: :request do
 
     context 'with sorting' do
       before(:all) do
-        get '/api/v1/used_model', params: { 'per_page': -1, 'sort': '+brand,+model' }, headers: access_token
+        get '/api/v1/used_models', params: { 'per_page': -1, 'sort': '+brand,+model' }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -115,7 +115,7 @@ RSpec.describe 'Used Model requests', type: :request do
       field_select = fields.sample
 
       before(:all) do
-        get '/api/v1/used_model', params: { 'select': field_select }, headers: access_token
+        get '/api/v1/used_models', params: { 'select': field_select }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -131,7 +131,7 @@ RSpec.describe 'Used Model requests', type: :request do
 
     context 'with include associations valid' do
       before(:all) do
-        get '/api/v1/used_model', params: { 'include': 'files_blobs,files_url' }, headers: access_token
+        get '/api/v1/used_models', params: { 'include': 'files_blobs,files_url' }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -148,16 +148,15 @@ RSpec.describe 'Used Model requests', type: :request do
     context 'when include invalid associations' do
       it 'raise a bad request exception' do
         expect {
-          get '/api/v1/used_model', params: { 'include': 'filess,filee' }, headers: access_token
+          get '/api/v1/used_models', params: { 'include': 'filess,filee' }, headers: access_token
         }.to raise_exception(ActionController::BadRequest)
       end
     end
   end
 
-  describe 'GET /api/v1/used_model/:id' do
-    id_to_get_id = UsedModel.all.sample.id.to_s
+  describe 'GET /api/v1/used_models/:id' do
     before(:all) do
-      get '/api/v1/used_model/' + id_to_get_id, headers: access_token
+      get '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, headers: access_token
     end
 
     it 'returns status ok' do
@@ -169,17 +168,16 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     it 'return matches with object searched' do
-      expect(UsedModel.find(id_to_get_id.to_i).attributes.to_json).to eq(response.body)
+      expect(UsedModel.find(JSON.parse(response.body)['id']).attributes.to_json).to eq(response.body)
     end
 
     context 'with field selecting' do
-      id_to_get_id = UsedModel.all.sample.id.to_s
       fields = UsedModel.column_names
       fields.delete('id')
       field_select = fields.sample
 
       before(:all) do
-        get '/api/v1/used_model/' + id_to_get_id, params: { 'select': field_select }, headers: access_token
+        get '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'select': field_select }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -192,10 +190,8 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     context 'with include associations valid' do
-      id_to_test = UsedModel.all.sample.id.to_s
-
       before(:all) do
-        get '/api/v1/used_model/' + id_to_test, params: { 'include': 'files_blobs,files_url' }, headers: access_token
+        get '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'include': 'files_blobs,files_url' }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -208,20 +204,17 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     context 'when include invalid associations' do
-      id_to_test = UsedModel.all.sample.id.to_s
-
       it 'raise a bad request exception' do
         expect {
-          get '/api/v1/used_model/' + id_to_test, params: { 'include': 'filess,filee' }, headers: access_token
+          get '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'include': 'filess,filee' }, headers: access_token
         }.to raise_exception(ActionController::BadRequest)
       end
     end
   end
 
-  describe 'GET /api/v1/used_model/:slug' do
-    id_to_get_slug = UsedModel.all.sample.slug.to_s
+  describe 'GET /api/v1/used_models/:slug' do
     before(:all) do
-      get '/api/v1/used_model/' + id_to_get_slug, headers: access_token
+      get '/api/v1/used_models/' + UsedModel.all.sample.slug.to_s, headers: access_token
     end
 
     it 'returns status ok' do
@@ -233,18 +226,18 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     it 'return matches with object searched' do
-      expect(UsedModel.friendly.find(id_to_get_slug).attributes.to_json).to eq(response.body)
+      expect(UsedModel.friendly.find(JSON.parse(response.body)['slug']).attributes.to_json).to eq(response.body)
     end
   end
 
-  describe 'POST /api/v1/used_model/' do
+  describe 'POST /api/v1/used_models/' do
     slug_to_post = Faker::Lorem.word
 
     context 'with valid params' do
       before(:all) do
         @quantity = UsedModel.all.size
         slug_to_post = Faker::Lorem.word
-        post '/api/v1/used_model/', params: {
+        post '/api/v1/used_models/', params: {
           'used_model': {
             'active': Faker::Boolean.boolean,
             'account_id': Faker::Number.number(1),
@@ -289,19 +282,18 @@ RSpec.describe 'Used Model requests', type: :request do
 
     context 'with invalid params' do
       it 'return a error' do
-        post '/api/v1/used_model/', params: { 'used_model': { 'slug': 'cr-v' }}, headers: access_token
+        post '/api/v1/used_models/', params: { 'used_model': { 'slug': 'cr-v' }}, headers: access_token
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
 
-  describe 'PUT /api/v1/used_model/:id' do
-    id_to_put = UsedModel.all.sample.id.to_s
+  describe 'PUT /api/v1/used_models/:id' do
     name_to_put = Faker::Lorem.word
 
     context 'with valid params' do
       before(:all) do
-        patch '/api/v1/used_model/' + id_to_put, params: { 'used_model': { 'name': name_to_put }}, headers: access_token
+        patch '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'used_model': { 'name': name_to_put }}, headers: access_token
       end
 
       it 'returns status ok' do
@@ -309,25 +301,24 @@ RSpec.describe 'Used Model requests', type: :request do
       end
 
       it 'updates requested record' do
-        expect(UsedModel.find(id_to_put).name).to eq(name_to_put)
+        expect(UsedModel.find(JSON.parse(response.body)['id']).name).to eq(name_to_put)
       end
     end
 
     context 'with invalid params' do
       it 'return a error' do
-        patch '/api/v1/used_model/' + id_to_put, params: { 'used_model': { 'unit_id': nil }}, headers: access_token
+        patch '/api/v1/used_models/' + UsedModel.all.sample.id.to_s, params: { 'used_model': { 'unit_id': nil }}, headers: access_token
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
   end
 
-  describe 'DELETE /api/v1/used_model/:id' do
-    id_to_del = UsedModel.all.sample.id.to_s
-
+  describe 'DELETE /api/v1/used_models/:id' do
     context 'with valid params' do
       before(:all) do
         @quantity = UsedModel.all.size
-        delete '/api/v1/used_model/' + id_to_del, headers: access_token
+        @id_to_del = UsedModel.all.sample.id.to_s
+        delete '/api/v1/used_models/' + @id_to_del, headers: access_token
       end
 
       it 'returns status no content' do
@@ -339,7 +330,7 @@ RSpec.describe 'Used Model requests', type: :request do
       end
 
       it 'check if record was deleted' do
-        expect{ UsedModel.find(id_to_del.to_i) }.to raise_exception(ActiveRecord::RecordNotFound)
+        expect{ UsedModel.find(@id_to_del.to_i) }.to raise_exception(ActiveRecord::RecordNotFound)
       end
     end
   end
