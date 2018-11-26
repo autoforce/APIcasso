@@ -8,7 +8,6 @@ module Apicasso
     include ActionController::HttpAuthentication::Token::ControllerMethods
     prepend_before_action :restrict_access
     before_action :set_root_resource
-    before_action :bad_request?
     after_action :register_api_request
 
     include SqlSecurity
@@ -181,12 +180,6 @@ module Apicasso
     def authorize_for(opts = {})
       authorize! opts[:action], opts[:resource] if opts[:resource].present?
       authorize! opts[:action], opts[:object] if opts[:object].present?
-    end
-
-    # Check for SQL injection before requests and
-    # raise a exception when find
-    def bad_request?
-      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(resource)
     end
   end
 end
