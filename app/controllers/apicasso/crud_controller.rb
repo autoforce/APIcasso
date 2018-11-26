@@ -3,6 +3,7 @@
 module Apicasso
   # Controller to consume read-only data to be used on client's frontend
   class CrudController < Apicasso::ApplicationController
+    prepend_before_action :klasses_allowed
     before_action :set_object, except: %i[index create schema]
     before_action :set_nested_resource, only: %i[nested_index]
     before_action :set_records, only: %i[index]
@@ -74,6 +75,11 @@ module Apicasso
     # attribute names as keys and attirbute types as values.
     def schema
       render json: resource_schema.to_json
+    end
+
+    # Check for a bad request to be more secure
+    def klasses_allowed
+      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless descendants_included?
     end
 
     private

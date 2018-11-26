@@ -7,7 +7,6 @@ module Apicasso
   class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
     prepend_before_action :restrict_access
-    prepend_before_action :klasses_allowed
     before_action :set_root_resource
     before_action :bad_request?
     after_action :register_api_request
@@ -160,11 +159,6 @@ module Apicasso
       query['page'] = records.previous_page
       uri.query = Rack::Utils.build_query(query)
       uri.to_s
-    end
-
-    # Check for a bad request to be more secure
-    def klasses_allowed
-      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless descendants_included?
     end
 
     # Check if it's a descendant model allowed
