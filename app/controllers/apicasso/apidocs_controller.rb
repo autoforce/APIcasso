@@ -4,7 +4,7 @@ module Apicasso
   # Controller used to generate an application Swagger JSON, used by
   # SwaggerUI to generate beautiful API documentation
   class ApidocsController < Apicasso::ApplicationController
-    skip_before_action :restrict_access, :set_root_resource
+    skip_before_action :restrict_access
 
     include Swagger::Blocks
     # Default application settings for documentation generation.
