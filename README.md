@@ -93,7 +93,7 @@ This way you enjoy all our object finder, authorization and authentication featu
 
 ## CORS
 
-APIcasso comes with a permissive CORS configuration out of the box. But you can make you own by editting your `config/initializers/apicasso.rb` file, which is created at the installation proccess. The file comes with descriptive comments and all configuration is based on [Rack CORS](https://github.com/cyu/rack-cors) options.
+APIcasso comes with a permissive CORS configuration out of the box. But you can make your own by editting the `config/initializers/apicasso.rb` file, which is created at the installation proccess. The file comes with some descriptive comments and all configuration is based on [Rack CORS](https://github.com/cyu/rack-cors) options.
 
 ## Authentication
 
