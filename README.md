@@ -11,7 +11,7 @@ You can make your own API with only 4 steps:
 ### Step 1
  Create your models
 ### Step 2
- Insert **APIcasso** engine into your routes
+ Insert **APIcasso** engine into your routes and run the installation command
 ### Step 3
  [Create an Apicasso::Key](https://github.com/autoforce/APIcasso#authorization)
 ### Step 4
@@ -36,6 +36,7 @@ $ bundle install && rails g apicasso:install
 
  - PostgreSQL with JSON columns support
  - Ruby 2.3+
+ - Rails 5+
 
 # Usage
 
@@ -89,6 +90,10 @@ And in your `app/controllers/custom_controller.rb` you would have something like
 ```
 
 This way you enjoy all our object finder, authorization and authentication features, making your job more straight into your business logic.
+
+## CORS
+
+APIcasso comes with a permissive CORS configuration out of the box. But you can make you own by editting your `config/initializers/apicasso.rb` file, which is created at the installation proccess. The file comes with descriptive comments and all configuration is based on [Rack CORS](https://github.com/cyu/rack-cors) options.
 
 ## Authentication
 
@@ -223,7 +228,6 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/Ervalh
 ### TODO
 
 - Add support to other databases
-- [Abstract a configurable CORS approach, maybe using middleware](https://github.com/autoforce/APIcasso/issues/22)
 - Add gem options like: Token rotation, Alternative authentication methods
 - Refine and document auto-documentation feature
 - Rate limiting
