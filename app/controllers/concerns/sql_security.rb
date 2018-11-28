@@ -4,6 +4,11 @@
 module SqlSecurity
   extend ActiveSupport::Concern
 
+  included do
+    prepend_before_action :klasses_allowed
+    append_before_action :bad_request?
+  end
+
   Rails.application.eager_load!
   DESCENDANTS_UNDERSCORED = ActiveRecord::Base.descendants.map do |descendant|
     descendant.to_s.underscore
@@ -32,6 +37,31 @@ module SqlSecurity
   end
 
   private
+
+  # Check for SQL injection before requests and
+  # raise a exception when find
+  def bad_request?
+    raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(resource)
+  end
+
+  # Check for a bad request to be more secure
+  def klasses_allowed
+    raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless descendants_included?
+  end
+
+  # Check if it's a descendant model allowed
+  def descendants_included?
+    DESCENDANTS_UNDERSCORED.include?(param_attribute.to_s.underscore)
+  end
+
+  # Get param to be compared
+  def param_attribute
+    representative_resource.singularize
+  end
+
+  def representative_resource
+    (params[:nested] || params[:resource] || controller_name)
+  end
 
   # Check if group params is safe for sql injection
   def group_sql_safe?(klass, value)

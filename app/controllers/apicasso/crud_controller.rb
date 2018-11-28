@@ -3,11 +3,11 @@
 module Apicasso
   # Controller to consume read-only data to be used on client's frontend
   class CrudController < Apicasso::ApplicationController
-    prepend_before_action :klasses_allowed
-    before_action :bad_request?
+    before_action :set_root_resource
     before_action :set_object, except: %i[index create schema]
     before_action :set_nested_resource, only: %i[nested_index]
-    before_action :set_records, only: %i[index]
+    before_action :set_records, only: %i[index nested_index]
+    include SqlSecurity
     include Orderable
     # GET /:resource
     # Returns a paginated, ordered and filtered query based response.
@@ -87,7 +87,11 @@ module Apicasso
     rescue NoMethodError
       @object = resource.find(id)
     ensure
-      authorize! action_name.to_sym, @object
+      authorize! action_to_cancancan, @object
+    end
+
+    def action_to_cancancan
+      action_name == 'nested_index' ? :index : action_name.to_sym
     end
 
     # Used to setup the resource's schema, mapping attributes and it's types
@@ -227,15 +231,14 @@ module Apicasso
       end.compact
     end
 
-    # Check for SQL injection before requests and
-    # raise a exception when find
-    def bad_request?
-      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless sql_injection(resource)
+    # Common setup to stablish which model is the resource of this request
+    def set_root_resource
+      @root_resource = params[:resource].classify.constantize
     end
 
-    # Check for a bad request to be more secure
-    def klasses_allowed
-      raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless descendants_included?
+    # Setup to stablish the nested model to be queried
+    def set_nested_resource
+      @nested_resource = @object.send(params[:nested].underscore.pluralize)
     end
   end
 end

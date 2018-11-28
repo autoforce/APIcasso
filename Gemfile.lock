@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    apicasso (0.6.2)
+    apicasso (0.6.4)
       cancancan (~> 2.0)
       friendly_id (~> 5.2.0)
       rack-cors

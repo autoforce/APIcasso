@@ -7,10 +7,7 @@ module Apicasso
   class ApplicationController < ActionController::API
     include ActionController::HttpAuthentication::Token::ControllerMethods
     prepend_before_action :restrict_access
-    before_action :set_root_resource
     after_action :register_api_request
-
-    include SqlSecurity
 
     # Sets the authorization scope for the current API key, it's a getter
     # to make scoping easier
@@ -65,16 +62,6 @@ module Apicasso
         status: response.status,
         body: (response.body.present? ? JSON.parse(response.body) : '')
       }
-    end
-
-    # Common setup to stablish which model is the resource of this request
-    def set_root_resource
-      @root_resource = params[:resource].classify.constantize
-    end
-
-    # Setup to stablish the nested model to be queried
-    def set_nested_resource
-      @nested_resource = @object.send(params[:nested].underscore.pluralize)
     end
 
     # Reutrns root_resource if nested_resource is not set scoped by permissions
@@ -158,20 +145,6 @@ module Apicasso
       query['page'] = records.previous_page
       uri.query = Rack::Utils.build_query(query)
       uri.to_s
-    end
-
-    # Check if it's a descendant model allowed
-    def descendants_included?
-      DESCENDANTS_UNDERSCORED.include?(param_attribute.to_s.underscore)
-    end
-
-    # Get param to be compared
-    def param_attribute
-      representative_resource.singularize
-    end
-
-    def representative_resource
-      (params[:nested] || params[:resource] || controller_name)
     end
 
     # Receives a `:action, :resource, :object` hash to validate authorization
