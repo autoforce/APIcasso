@@ -112,7 +112,7 @@ module CrudUtils
   end
 
   def parsed_include(opts = nil)
-    params[:include].split(',').map do |param|
+    params[:include]&.split(',')&.map do |param|
       next unless @object.respond_to?(param)
 
       if opts == :method
@@ -120,7 +120,7 @@ module CrudUtils
       elsif opts == :include
         param if associations_array.include?(param)
       end
-    end.compact
+    end&.compact
   end
 
   # Used to avoid errors in fieldset selection parsing and to enable a
