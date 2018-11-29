@@ -60,91 +60,13 @@ module Apicasso
     def response_metadata
       {
         status: response.status,
-        body: (response.body.present? ? JSON.parse(response.body) : '')
+        body: parsed_response
       }
     end
 
-    # Reutrns root_resource if nested_resource is not set scoped by permissions
-    def resource
-      (@nested_resource || @root_resource)
-    end
-
-    # A method to extract all assosciations available
-    def associations_array
-      resource.reflect_on_all_associations.map { |association| association.name.to_s }
-    end
-
-    # Used to avoid errors parsing the search query, which can be passed as
-    # a JSON or as a key-value param. JSON is preferred because it generates
-    # shorter URLs on GET parameters.
-    def parsed_query
-      JSON.parse(params[:q])
-    rescue JSON::ParserError, TypeError
-      params[:q]
-    end
-
-    # Used to avoid errors in included associations parsing and to enable a
-    # insertion point for a change on splitting method.
-    def parsed_associations
-      params[:include].split(',').map do |param|
-        if @object.respond_to?(param)
-          param if associations_array.include?(param)
-        end
-      end.compact
-    rescue NoMethodError
-      []
-    end
-
-    # Used to avoid errors in included associations parsing and to enable a
-    # insertion point for a change on splitting method.
-    def parsed_methods
-      params[:include].split(',').map do |param|
-        if @object.respond_to?(param)
-          param unless associations_array.include?(param)
-        end
-      end.compact
-    rescue NoMethodError
-      []
-    end
-
-    # Used to avoid errors in fieldset selection parsing and to enable a
-    # insertion point for a change on splitting method.
-    def parsed_select
-      params[:select].split(',').map do |field|
-        field if resource.column_names.include?(field)
-      end
-    rescue NoMethodError
-      []
-    end
-
-    # Receives a `.paginate`d collection and returns the pagination
-    # metadata to be merged into response
-    def pagination_metadata_for(records)
-      { total: records.total_entries,
-        total_pages: records.total_pages,
-        last_page: records.next_page.blank?,
-        previous_page: previous_link_for(records),
-        next_page: next_link_for(records),
-        out_of_bounds: records.out_of_bounds?,
-        offset: records.offset }
-    end
-
-    # Generates a contextualized URL of the next page for the request
-    def next_link_for(records)
-      uri = URI.parse(request.original_url)
-      query = Rack::Utils.parse_query(uri.query)
-      query['page'] = records.next_page
-      uri.query = Rack::Utils.build_query(query)
-      uri.to_s
-    end
-
-    # Generates a contextualized URL of the previous page for the request
-    def previous_link_for(records)
-      uri = URI.parse(request.original_url)
-      query = Rack::Utils.parse_query(uri.query)
-      query['page'] = records.previous_page
-      uri.query = Rack::Utils.build_query(query)
-      uri.to_s
+    # Parsed response to save as metadata for the requests
+    def parsed_response
+      (response.body.present? ? JSON.parse(response.body) : '')
     end
 
     # Receives a `:action, :resource, :object` hash to validate authorization

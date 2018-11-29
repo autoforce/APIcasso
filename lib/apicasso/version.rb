@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# A Module to rule them all...
 module Apicasso
-  VERSION = '0.6.4'.freeze
+  # Current gem version
+  VERSION = '0.6.5'.freeze
 end

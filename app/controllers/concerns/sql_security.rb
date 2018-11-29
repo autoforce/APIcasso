@@ -46,12 +46,13 @@ module SqlSecurity
 
   # Check for a bad request to be more secure
   def klasses_allowed
-    raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless descendants_included?
+    raise ActionController::BadRequest.new('Bad hacker, stop be bully or I will tell to your mom!') unless safe_resource?
   end
 
-  # Check if it's a descendant model allowed
-  def descendants_included?
-    DESCENDANTS_UNDERSCORED.include?(param_attribute.to_s.underscore)
+  # Check if it's safe to use the requet
+  def safe_resource?
+    controller_name == representative_resource ||
+      DESCENDANTS_UNDERSCORED.include?(param_attribute.to_s.underscore)
   end
 
   # Get param to be compared
