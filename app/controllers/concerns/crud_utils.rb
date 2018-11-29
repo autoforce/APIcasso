@@ -31,36 +31,63 @@ module CrudUtils
     built
   end
 
+  # Used to setup the resource's schema, mapping attributes and it's types
+  def resource_schema
+    schemated = {}
+    resource.columns_hash.each { |key, value| schemated[key] = value.type }
+    schemated
+  end
+
   # A wrapper to has_one relations parameter building
   def has_one_params
     resource.reflect_on_all_associations(:has_one).map do |one|
-      if one.class_name.starts_with?('ActiveStorage')
-        next if one.class_name.ends_with?('Blob')
-
-        one.name.to_s.gsub(/(_attachment)$/, '').to_sym
-      else
-        one.name
-      end
+      relation_param(one)
     end.compact
   end
 
   # A wrapper to has_many parameter building
   def has_many_params
     resource.reflect_on_all_associations(:has_many).map do |many|
-      if many.class_name.starts_with?('ActiveStorage')
-        next if many.class_name.ends_with?('Blob')
-
-        { many.name.to_s.gsub(/(_attachments)$/, '').to_sym => [] }
-      else
-        { many.name.to_sym => [] }
-      end
+      relation_param(many)
     end.compact
+  end
+
+  # Extract permitted parameter from relation based on it's type
+  # This method proccess ActiveStorage parameters differently,
+  # so that it becomes available without further configuration
+  def relation_param(relation)
+    if relation.class_name.starts_with?('ActiveStorage')
+      return if relation.class_name.ends_with?('Blob')
+
+      active_storage_param(relation)
+    else
+      common_relation_param(relation)
+    end
+  end
+
+  # Non-ActiveStorage relation parameter parsing, receives the
+  # relation reflection as parameter
+  def common_relation_param(relation)
+    if relation.has_one?
+      relation.name
+    else
+      { relation.name.to_sym => [] }
+    end
+  end
+
+  # ActiveStorage relation parameter parsing, receives the
+  # relation reflection as parameter
+  def active_storage_param(relation)
+    if relation.has_one?
+      relation.name.to_s.gsub(/(_attachment)$/, '').to_sym
+    else
+      { relation.name.to_s.gsub(/(_attachments)$/, '').to_sym => [] }
+    end
   end
 
   # Parse to include options
   def include_options
-    { include: parsed_associations || [],
-      methods: parsed_methods || [] }
+    { include: parsed_associations || [], methods: parsed_methods || [] }
   end
 
   # Used to avoid errors parsing the search query, which can be passed as
@@ -75,25 +102,25 @@ module CrudUtils
   # Used to avoid errors in included associations parsing and to enable a
   # insertion point for a change on splitting method.
   def parsed_associations
-    params[:include].split(',').map do |param|
-      if @object.respond_to?(param)
-        param if associations_array.include?(param)
-      end
-    end.compact
-  rescue NoMethodError
-    []
+    parsed_include(:include)
   end
 
   # Used to avoid errors in included associations parsing and to enable a
   # insertion point for a change on splitting method.
   def parsed_methods
-    params[:include].split(',').map do |param|
-      if @object.respond_to?(param)
+    parsed_include(:method)
+  end
+
+  def parsed_include(opts = nil)
+    params[:include]&.split(',')&.map do |param|
+      next unless @object.respond_to?(param)
+
+      if opts == :method
         param unless associations_array.include?(param)
+      elsif opts == :include
+        param if associations_array.include?(param)
       end
-    end.compact
-  rescue NoMethodError
-    []
+    end&.compact
   end
 
   # Used to avoid errors in fieldset selection parsing and to enable a
@@ -135,5 +162,12 @@ module CrudUtils
     query['page'] = records.send("#{opts[:page]}_page")
     uri.query = Rack::Utils.build_query(query)
     uri.to_s
+  end
+
+  # Only allow a trusted parameter "white list" through,
+  # based on resource's schema.
+  def object_params
+    params.require(resource.name.underscore.to_sym)
+          .permit(resource_params)
   end
 end

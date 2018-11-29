@@ -91,13 +91,6 @@ module Apicasso
       authorize! action_to_cancancan, @object
     end
 
-    # Used to setup the resource's schema, mapping attributes and it's types
-    def resource_schema
-      schemated = {}
-      resource.columns_hash.each { |key, value| schemated[key] = value.type }
-      schemated
-    end
-
     # Used to setup the records from the selected resource that are
     # going to be rendered, if authorized
     def set_records
@@ -178,13 +171,6 @@ module Apicasso
       else
         built_paginated
       end
-    end
-
-    # Only allow a trusted parameter "white list" through,
-    # based on resource's schema.
-    def object_params
-      params.require(resource.name.underscore.to_sym)
-            .permit(resource_params)
     end
 
     # Common setup to stablish which model is the resource of this request
