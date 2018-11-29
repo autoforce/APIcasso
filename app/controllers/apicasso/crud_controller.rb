@@ -8,6 +8,7 @@ module Apicasso
     before_action :set_nested_resource, only: %i[nested_index]
     before_action :set_records, only: %i[index nested_index]
     include SqlSecurity
+    include CrudUtils
     include Orderable
     # GET /:resource
     # Returns a paginated, ordered and filtered query based response.
@@ -90,10 +91,6 @@ module Apicasso
       authorize! action_to_cancancan, @object
     end
 
-    def action_to_cancancan
-      action_name == 'nested_index' ? :index : action_name.to_sym
-    end
-
     # Used to setup the resource's schema, mapping attributes and it's types
     def resource_schema
       schemated = {}
@@ -169,12 +166,6 @@ module Apicasso
         total: @records.size }
     end
 
-    # Parse to include options
-    def include_options
-      { include: parsed_associations || [],
-        methods: parsed_methods || [] }
-    end
-
     # Parsed JSON to be used as response payload, with included relations
     def include_relations
       @records = @records.includes(parsed_associations)
@@ -194,41 +185,6 @@ module Apicasso
     def object_params
       params.require(resource.name.underscore.to_sym)
             .permit(resource_params)
-    end
-
-    # Resource params mapping, with a twist:
-    # Including relations as they are needed
-    def resource_params
-      built = resource_schema.keys
-      built += has_one_params if has_one_params.present?
-      built += has_many_params if has_many_params.present?
-      built
-    end
-
-    # A wrapper to has_one relations parameter building
-    def has_one_params
-      resource.reflect_on_all_associations(:has_one).map do |one|
-        if one.class_name.starts_with?('ActiveStorage')
-          next if one.class_name.ends_with?('Blob')
-
-          one.name.to_s.gsub(/(_attachment)$/, '').to_sym
-        else
-          one.name
-        end
-      end.compact
-    end
-
-    # A wrapper to has_many parameter building
-    def has_many_params
-      resource.reflect_on_all_associations(:has_many).map do |many|
-        if many.class_name.starts_with?('ActiveStorage')
-          next if many.class_name.ends_with?('Blob')
-
-          { many.name.to_s.gsub(/(_attachments)$/, '').to_sym => [] }
-        else
-          { many.name.to_sym => [] }
-        end
-      end.compact
     end
 
     # Common setup to stablish which model is the resource of this request
