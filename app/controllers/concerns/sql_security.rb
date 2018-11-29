@@ -27,16 +27,22 @@ module SqlSecurity
 
   # Check if request is a sql injection
   def sql_injection(klass)
-    apicasso_parameters.each do |key, value|
-      if key.to_sym == :group
-        return false unless group_sql_safe?(klass, value)
-      else
-        return false unless parameters_sql_safe?(klass, value)
-      end
+    apicasso_parameters.each do |name, value|
+      next if safe_parameter?(klass, name, value)
+
+      return false
     end
   end
 
   private
+
+  def safe_parameter?(klass, name, value)
+    if name.to_sym == :group
+      group_sql_safe?(klass, value)
+    else
+      parameters_sql_safe?(klass, value)
+    end
+  end
 
   # Check for SQL injection before requests and
   # raise a exception when find

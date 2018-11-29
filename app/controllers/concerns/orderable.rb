@@ -39,7 +39,8 @@ module Orderable
     attr.match(/\A[+-]/).nil? ? '+': attr.slice!(0)
   end
 
+  # Gets class of the resource of the current request
   def model
-    representative_resource.classify.constantize
+    (params[:nested] || params[:resource] || controller_name).classify.constantize
   end
 end
