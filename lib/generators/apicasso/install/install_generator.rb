@@ -29,7 +29,7 @@ module Apicasso
 
       # Create an initializer with CORS configuration to Apicasso
       def copy_initializer
-        copy_file 'apicasso.rb', 'config/initalizers/apicasso.rb'
+        copy_file 'apicasso.rb', 'config/initializers/apicasso.rb'
       end
     end
   end
