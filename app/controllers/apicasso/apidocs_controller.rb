@@ -363,11 +363,8 @@ module Apicasso
         end
 
         next if Apicasso.configuration.model_definitions_excluded.include?(inner_name)
-
         next if association.polymorphic?
-
         next if ASSOCIATION_EXCLUDED.include?(inner_name)
-
         inner_klass = begin inner_name.constantize rescue NameError; false end
         swagger_path "/#{model.name.underscore}/{id}/#{association.name}" do
           operation :get do
@@ -502,7 +499,6 @@ module Apicasso
             end
           end
         end
-
       end
     end
 
