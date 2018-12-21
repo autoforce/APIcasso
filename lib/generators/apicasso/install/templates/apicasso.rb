@@ -50,4 +50,8 @@ Apicasso.configure do |config|
   # a valid CORS request.
   # Must be a Proc
   config.if = nil
+
+  # Associations to be excluded in definitions when generate the
+  # documentation by APIcasso.
+  config.model_definitions_excluded = []
 end
