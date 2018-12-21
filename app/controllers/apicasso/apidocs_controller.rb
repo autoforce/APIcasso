@@ -355,11 +355,21 @@ module Apicasso
       end
 
       # Resource's associations definitions
-      model.reflect_on_all_associations.map(&:name).each do |association|
-        inner_name = association.to_s.classify
+      model.reflect_on_all_associations.each do |association|
+        begin
+          inner_name = association.class_name.to_s.classify
+        rescue NoMethodError, ActionController::RoutingError
+          inner_name = association.name.to_s.classify
+        end
+
+        next if Apicasso.configuration.model_definitions_excluded.include?(inner_name)
+
+        next if association.polymorphic?
+
         next if ASSOCIATION_EXCLUDED.include?(inner_name)
+
         inner_klass = begin inner_name.constantize rescue NameError; false end
-        swagger_path "/#{model.name.underscore}/{id}/#{association}" do
+        swagger_path "/#{model.name.underscore}/{id}/#{association.name}" do
           operation :get do
             key :summary, I18n.t("activerecord.models.#{inner_name.underscore}.index.summary", default: inner_name)
             key :description, I18n.t("activerecord.models.#{inner_name.underscore}.index.description", default: inner_name)
@@ -492,6 +502,7 @@ module Apicasso
             end
           end
         end
+
       end
     end
 
