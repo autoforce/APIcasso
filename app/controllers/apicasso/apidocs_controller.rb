@@ -126,7 +126,6 @@ module Apicasso
 
     # Builds JSON of definitions with operations from each model
     ActiveRecord::Base.descendants.each do |model|
-      # byebug if model.name == 'Show'
 
       next if MODELS_EXCLUDED.include?(model.name) || model.abstract_class
 
