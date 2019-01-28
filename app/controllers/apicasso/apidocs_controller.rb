@@ -126,7 +126,6 @@ module Apicasso
 
     # Builds JSON of definitions with operations from each model
     ActiveRecord::Base.descendants.each do |model|
-
       next if MODELS_EXCLUDED.include?(model.name) || model.abstract_class
 
       # Resource definitions of GET, OPTIONS, POST
