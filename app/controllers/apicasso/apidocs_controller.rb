@@ -58,7 +58,7 @@ module Apicasso
     end
 
     # Eager load application to be able to list all models
-    Rails.application.eager_load! unless Rails.configuration.cache_classes
+    Rails.application.eager_load!
     # A list of all classes that have swagger_* declarations, which gets
     # injected by this gem in all `ActiveRecord::Base` classes
     SWAGGERED_CLASSES = [
