@@ -59,6 +59,7 @@ module Apicasso
     alias nested_index index
 
     # POST /:resource
+    # Common behavior for an create API endpoint
     def create
       @object = resource.new(object_params)
       authorize_for(action: :create,
@@ -69,6 +70,48 @@ module Apicasso
       else
         render json: @object.errors, status: :unprocessable_entity
       end
+    end
+
+    # POST /
+    # This action creates records based on request payload. It reads the JSON
+    # taking it's keys as model scope and array values as records to create.
+    def batch_create
+      @object = resource.new(object_params)
+      authorize_for(action: :create,
+                    resource: resource.name.underscore.to_sym,
+                    object: @object)
+      if @object.save
+        render json: @object.to_json, status: :created
+      else
+        render json: @object.errors, status: :unprocessable_entity
+      end
+    end
+
+    # PATCH/PUT /
+    # This action updates records based on request payload. It reads the JSON
+    # taking it's keys as model scope and array values as records to update
+    # through it's ids.
+    def batch_update
+      authorize_for(action: :update,
+                    resource: resource.name.underscore.to_sym,
+                    object: @object)
+      if @object.update(object_params)
+        render json: @object.to_json
+      else
+        render json: @object.errors, status: :unprocessable_entity
+      end
+    end
+
+    # GET /
+    # Returns an ordered and filtered query based response.
+    # Consider this
+    # To get all `Channel` sorted by ascending `name` , filtered by
+    # the ones that have a `domain` that matches exactly `"domain.com"`,
+    # paginating records 42 per page and retrieving the page 42.
+    # Example:
+    #   GET /sites?sort=+name,-updated_at&q[domain_eq]=domain.com&page=42&per_page=42
+    def index
+      render json: index_json
     end
 
     # OPTIONS /:resource

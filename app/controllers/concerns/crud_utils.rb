@@ -63,6 +63,8 @@ module CrudUtils
     else
       common_relation_param(relation)
     end
+  rescue StandardError
+    return
   end
 
   # Non-ActiveStorage relation parameter parsing, receives the
