@@ -8,6 +8,11 @@ Apicasso::Engine.routes.draw do
     # match ' /: resource /: id / custom-action ' => ' custom # not_a_crud ' , via: :get
     # mount Apicasso :: Engine , em:  " / api / v1 "
     resources :apidocs, only: [:index]
+
+    get '/ql/', to: 'crud#ql', via: :get
+    match '/batch_create/', to: 'crud#batch_create', via: :post
+    match '/batch_update/', to: 'crud#batch_update', via: :patch
+
     get '/:resource/', to: 'crud#index', via: :get
     match '/:resource/', to: 'crud#create', via: :post
     get '/:resource/:id', to: 'crud#show', via: :get
