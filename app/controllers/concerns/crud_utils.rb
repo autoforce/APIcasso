@@ -95,10 +95,10 @@ module CrudUtils
   # Used to avoid errors parsing the search query, which can be passed as
   # a JSON or as a key-value param. JSON is preferred because it generates
   # shorter URLs on GET parameters.
-  def parsed_query
-    JSON.parse(params[:q])
+  def parsed_query(query = nil)
+    JSON.parse(params[:q] || query)
   rescue JSON::ParserError, TypeError
-    params[:q]
+    params[:q] || query
   end
 
   # Used to avoid errors in included associations parsing and to enable a
