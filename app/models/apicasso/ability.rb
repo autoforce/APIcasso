@@ -19,31 +19,40 @@ module Apicasso
 
     def build_permissions(opts = {})
       permission = opts[:permission].to_sym
-      if opts[:clearance] == true
-        can permission, :all
-        return
-      end
-      opts[:clearance].each do |klass, clearance|
+      clearances = opts[:clearance]
+      # To have full read access to the whole APIcasso just set a
+      # true key scope operation.
+      # Usage:
+      # To have full read access to the system the scope would be:
+      # => `{read: true}`
+      can permission, :all && return if clearances == true
+
+      clearances.to_h.each do |klass, clearance|
         klass_module = klass.underscore.singularize.to_sym
         klass = klass.classify.constantize
+        can permission, klass_module
         if clearance == true
           # Usage:
           # To have a key reading all channels and all accouts
           # you would have a scope:
           # => `{read: {channel: true, accout: true}}`
-          can permission, klass_module
           can permission, klass
-        elsif clearance.class == Hash
-          # Usage:
-          # To have a key reading all banners from a channel with id 999
-          # you would have a scope:
-          # => `{read: {banner: {owner_id: [999]}}}`
-          can permission, klass_module
-          clearance.each do |by_field, values|
-            can permission, klass, by_field.to_sym => values
-          end
+        else
+          clear_for(permission, klass, clearance)
         end
       end
+    end
+  end
+
+  # Given a permission, a class and a hash of clearance conditions
+  # builds permissions for the current ability.
+  # Usage:
+  # To have a key reading all banners from a channel with id 999
+  # you would have a scope:
+  # => `{read: {banner: {owner_id: [999]}}}`
+  def clear_for(permission, klass, clearance)
+    clearance.to_h.each do |by_field, values|
+      can permission, klass, by_field.to_sym => values
     end
   end
 end
