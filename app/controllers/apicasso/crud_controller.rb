@@ -3,13 +3,47 @@
 module Apicasso
   # Controller to consume read-only data to be used on client's frontend
   class CrudController < Apicasso::ApplicationController
-    before_action :set_root_resource
-    before_action :set_object, except: %i[index create schema]
+    before_action :set_root_resource, except: %i[ql batch_create batch_update]
+    before_action :set_object, except: %i[index create schema ql batch_create batch_update]
     before_action :set_nested_resource, only: %i[nested_index]
     before_action :set_records, only: %i[index nested_index]
     include SqlSecurity
     include CrudUtils
     include Orderable
+
+    # POST /:resource
+    # Common behavior for an create API endpoint
+    def create
+      @object = resource.new(object_params)
+      authorize_for(action: :create,
+                    resource: resource.name.underscore.to_sym,
+                    object: @object)
+      if @object.save
+        render json: @object.to_json, status: :created
+      else
+        render json: @object.errors, status: :unprocessable_entity
+      end
+    end
+
+    # POST /batch_create
+    # This action creates records based on request payload. It reads the JSON
+    # taking it's keys as model scope and array values as records to create.
+    def batch_create
+      params[:crud].to_unsafe_h.each do |batch_resource, objects|
+        batch_resource = batch_resource.to_s
+        resource = batch_resource.classify.constantize
+        authorize_for(action: :create,
+                      resource: batch_resource.underscore.to_sym)
+        objects.each do |batch_object|
+          authorize_for(action: :create,
+                        resource: batch_module,
+                        object: resource.new(batch_object))
+        end
+        resource.create!(objects)
+      end
+      head :created
+    end
+
     # GET /:resource
     # Returns a paginated, ordered and filtered query based response.
     # Consider this
@@ -29,6 +63,26 @@ module Apicasso
       render json: show_json
     end
 
+    # GET /:resource/1/:nested_resource
+    alias nested_index index
+
+    # GET /ql
+    # This action takes a JSON as argument with models as keys and ransack
+    # conditions as values, returning a custom indexed payload.
+    # WARNING: This action is not paginated, so thread carefully when using it.
+    def ql
+      returns = params[:crud].to_unsafe_h.map do |batch_resource, query|
+        batch_resource = batch_resource.to_s
+        batch_module = batch_resource.underscore.to_sym
+        resource = batch_resource.classify.constantize
+        authorize_for(action: :index,
+                      resource: batch_module)
+        records = resource.ransack(parsed_query(query)).result.as_json
+        [batch_module, records]
+      end.to_h
+      render json: returns
+    end
+
     # PATCH/PUT /:resource/1
     # Common behavior for an update API endpoint
     def update
@@ -42,6 +96,28 @@ module Apicasso
       end
     end
 
+    # PATCH/PUT /batch_update
+    # This action updates records based on request payload. It reads the JSON
+    # taking it's keys as model scope and array values as records to update
+    # through it's ids.
+    def batch_update
+      params[:crud].to_unsafe_h.each do |batch_resource, objects|
+        objects = Array.wrap(objects).select { |object| object['id'].present? }
+        batch_resource = batch_resource.to_s
+        batch_module = batch_resource.underscore.to_sym
+        resource = batch_resource.classify.constantize
+        authorize_for(action: :update,
+                      resource: batch_module)
+        objects.each do |batch_object|
+          authorize_for(action: :update,
+                        resource: batch_module,
+                        object: resource.new(batch_object))
+        end
+        resource.update!(objects)
+      end
+      head :updated
+    end
+
     # DELETE /:resource/1
     # Common behavior for an destroy API endpoint
     def destroy
@@ -53,65 +129,6 @@ module Apicasso
       else
         render json: @object.errors, status: :unprocessable_entity
       end
-    end
-
-    # GET /:resource/1/:nested_resource
-    alias nested_index index
-
-    # POST /:resource
-    # Common behavior for an create API endpoint
-    def create
-      @object = resource.new(object_params)
-      authorize_for(action: :create,
-                    resource: resource.name.underscore.to_sym,
-                    object: @object)
-      if @object.save
-        render json: @object.to_json, status: :created
-      else
-        render json: @object.errors, status: :unprocessable_entity
-      end
-    end
-
-    # POST /
-    # This action creates records based on request payload. It reads the JSON
-    # taking it's keys as model scope and array values as records to create.
-    def batch_create
-      @object = resource.new(object_params)
-      authorize_for(action: :create,
-                    resource: resource.name.underscore.to_sym,
-                    object: @object)
-      if @object.save
-        render json: @object.to_json, status: :created
-      else
-        render json: @object.errors, status: :unprocessable_entity
-      end
-    end
-
-    # PATCH/PUT /
-    # This action updates records based on request payload. It reads the JSON
-    # taking it's keys as model scope and array values as records to update
-    # through it's ids.
-    def batch_update
-      authorize_for(action: :update,
-                    resource: resource.name.underscore.to_sym,
-                    object: @object)
-      if @object.update(object_params)
-        render json: @object.to_json
-      else
-        render json: @object.errors, status: :unprocessable_entity
-      end
-    end
-
-    # GET /
-    # Returns an ordered and filtered query based response.
-    # Consider this
-    # To get all `Channel` sorted by ascending `name` , filtered by
-    # the ones that have a `domain` that matches exactly `"domain.com"`,
-    # paginating records 42 per page and retrieving the page 42.
-    # Example:
-    #   GET /sites?sort=+name,-updated_at&q[domain_eq]=domain.com&page=42&per_page=42
-    def index
-      render json: index_json
     end
 
     # OPTIONS /:resource
