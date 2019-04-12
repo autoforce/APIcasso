@@ -12,7 +12,7 @@ module Apicasso
       key ||= Apicasso::Key.new
       cannot :manage, :all
       cannot :read, :all
-      key.scope.each do |permission, klasses_clearances|
+      key.scope&.each do |permission, klasses_clearances|
         build_permissions(permission: permission, clearance: klasses_clearances)
       end
     end
@@ -25,20 +25,22 @@ module Apicasso
       # Usage:
       # To have full read access to the system the scope would be:
       # => `{read: true}`
-      can permission, :all && return if clearances == true
-
-      clearances.to_h.each do |klass, clearance|
-        klass_module = klass.underscore.singularize.to_sym
-        klass = klass.classify.constantize
-        can permission, klass_module
-        if clearance == true
-          # Usage:
-          # To have a key reading all channels and all accouts
-          # you would have a scope:
-          # => `{read: {channel: true, accout: true}}`
-          can permission, klass
-        else
-          clear_for(permission, klass, clearance)
+      if clearances == true
+        can permission, :all
+      else
+        clearances.to_h.each do |klass, clearance|
+          klass_module = klass.underscore.singularize.to_sym
+          klass = klass.classify.constantize
+          can permission, klass_module
+          if clearance == true
+            # Usage:
+            # To have a key reading all channels and all accouts
+            # you would have a scope:
+            # => `{read: {channel: true, accout: true}}`
+            can permission, klass
+          else
+            clear_for(permission, klass, clearance)
+          end
         end
       end
     end
