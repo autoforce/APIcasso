@@ -54,9 +54,9 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     context 'by searching' do
-      brand_to_search = UsedModel.all.sample.brand
       before(:all) do
-        get '/api/v1/used_models', params: { 'q[brand_matches]': brand_to_search }, headers: access_token
+        @brand_to_search = UsedModel.where.not(brand: nil).sample.brand
+        get '/api/v1/used_models', params: { 'q[brand_matches]': @brand_to_search }, headers: access_token
       end
 
       it 'returns status ok' do
@@ -65,7 +65,7 @@ RSpec.describe 'Used Model requests', type: :request do
 
       it 'returns all records with brand queried' do
         JSON.parse(response.body)['entries'].each do |record|
-          expect(record['brand']).to eq(brand_to_search)
+          expect(record['brand']).to eq(@brand_to_search)
         end
       end
     end
@@ -89,7 +89,7 @@ RSpec.describe 'Used Model requests', type: :request do
       end
 
       it 'returns all records grouped by field queried' do
-        expect(response.body).to eq(UsedModel.where("#{column_fields} is NOT NULL").group(column_by).count.to_json)
+        expect(response.body).to eq(UsedModel.group(column_by).calculate(:count, column_fields).to_json)
       end
     end
 

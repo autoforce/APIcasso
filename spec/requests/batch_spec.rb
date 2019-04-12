@@ -9,9 +9,10 @@ RSpec.describe 'Batch requests', type: :request do
   describe 'GET /api/v1/ql' do
     context 'with valid params' do
       before(:all) do
+        @attribute = UsedModel.column_names.sample
         @used_model = UsedModel.all.sample
-        @another_used_model = UsedModel.where.not(id: @used_model.id).sample
-        post '/api/v1/ql/', params: { used_models: { id_eq: @used_model.id } }.to_json, headers: access_token
+        @another_used_model = UsedModel.where.not(@attribute => @used_model.send(@attribute)).sample
+        post '/api/v1/ql/', params: { used_models: { "#{@attribute}_eq": @used_model.send(@attribute) } }.to_json, headers: access_token
       end
 
       it 'returns status ok' do
@@ -29,7 +30,7 @@ RSpec.describe 'Batch requests', type: :request do
       it 'returns params structure reflecting the batch parameter' do
         expect(JSON.parse(response.body)['used_models']).to include(JSON.parse(@used_model.to_json))
         expect(JSON.parse(response.body)['used_model']).to be_nil
-        post '/api/v1/ql/', params: { used_model: { id_eq: @used_model.id } }.to_json, headers: access_token
+        post '/api/v1/ql/', params: { used_model: { "#{@attribute}_eq": @used_model.send(@attribute) } }.to_json, headers: access_token
         expect(JSON.parse(response.body)['used_model']).to include(JSON.parse(@used_model.to_json))
         expect(JSON.parse(response.body)['used_models']).to be_nil
       end
