@@ -106,10 +106,7 @@ GEM
     nio4r (2.3.1)
     nokogiri (1.10.2)
       mini_portile2 (~> 2.4.0)
-    nokogiri (1.10.2-x64-mingw32)
-      mini_portile2 (~> 2.4.0)
     pg (1.1.4)
-    pg (1.1.4-x64-mingw32)
     public_suffix (3.0.3)
     rack (2.0.7)
     rack-cors (1.0.3)
@@ -190,7 +187,6 @@ GEM
 
 PLATFORMS
   ruby
-  x64-mingw32
 
 DEPENDENCIES
   apicasso!
@@ -205,4 +201,4 @@ DEPENDENCIES
   rspec-rails
 
 BUNDLED WITH
-   1.17.1
+   2.0.1
