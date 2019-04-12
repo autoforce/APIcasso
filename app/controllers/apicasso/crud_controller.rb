@@ -25,25 +25,6 @@ module Apicasso
       end
     end
 
-    # POST /batch_create
-    # This action creates records based on request payload. It reads the JSON
-    # taking it's keys as model scope and array values as records to create.
-    def batch_create
-      params[:crud].to_unsafe_h.each do |batch_resource, objects|
-        batch_resource = batch_resource.to_s
-        resource = batch_resource.classify.constantize
-        authorize_for(action: :create,
-                      resource: batch_resource.underscore.to_sym)
-        objects.each do |batch_object|
-          authorize_for(action: :create,
-                        resource: batch_module,
-                        object: resource.new(batch_object))
-        end
-        resource.create!(objects)
-      end
-      head :created
-    end
-
     # GET /:resource
     # Returns a paginated, ordered and filtered query based response.
     # Consider this
@@ -66,23 +47,6 @@ module Apicasso
     # GET /:resource/1/:nested_resource
     alias nested_index index
 
-    # GET /ql
-    # This action takes a JSON as argument with models as keys and ransack
-    # conditions as values, returning a custom indexed payload.
-    # WARNING: This action is not paginated, so thread carefully when using it.
-    def ql
-      returns = params[:crud].to_unsafe_h.map do |batch_resource, query|
-        batch_resource = batch_resource.to_s
-        batch_module = batch_resource.underscore.to_sym
-        resource = batch_resource.classify.constantize
-        authorize_for(action: :index,
-                      resource: batch_module)
-        records = resource.ransack(parsed_query(query)).result.as_json
-        [batch_module, records]
-      end.to_h
-      render json: returns
-    end
-
     # PATCH/PUT /:resource/1
     # Common behavior for an update API endpoint
     def update
@@ -94,28 +58,6 @@ module Apicasso
       else
         render json: @object.errors, status: :unprocessable_entity
       end
-    end
-
-    # PATCH/PUT /batch_update
-    # This action updates records based on request payload. It reads the JSON
-    # taking it's keys as model scope and array values as records to update
-    # through it's ids.
-    def batch_update
-      params[:crud].to_unsafe_h.each do |batch_resource, objects|
-        objects = Array.wrap(objects).select { |object| object['id'].present? }
-        batch_resource = batch_resource.to_s
-        batch_module = batch_resource.underscore.to_sym
-        resource = batch_resource.classify.constantize
-        authorize_for(action: :update,
-                      resource: batch_module)
-        objects.each do |batch_object|
-          authorize_for(action: :update,
-                        resource: batch_module,
-                        object: resource.new(batch_object))
-        end
-        resource.update!(objects)
-      end
-      head :updated
     end
 
     # DELETE /:resource/1
