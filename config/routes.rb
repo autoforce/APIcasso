@@ -5,13 +5,13 @@ Apicasso::Engine.routes.draw do
     # objects to go straight into your logic. If you have built the APIcasso's engine into
     # a route it is important that your custom action takes precedence over the gem's ones.
     # Usage:
-    # match ' /: resource /: id / custom-action ' => ' custom # not_a_crud ' , via: :get
-    # mount Apicasso :: Engine , em:  " / api / v1 "
+    # match '/:resource/:id/custom-action' => 'custom#not_a_crud', via: :get
+    # mount Apicasso::Engine, at: "/api/v1"
     resources :apidocs, only: [:index]
 
-    get '/ql/', to: 'crud#ql', via: :get
-    match '/batch_create/', to: 'crud#batch_create', via: :post
-    match '/batch_update/', to: 'crud#batch_update', via: :patch
+    match '/ql/', to: 'batch#ql', via: :post
+    match '/batch_create/', to: 'batch#batch_create', via: :post
+    match '/batch_update/', to: 'batch#batch_update', via: :patch
 
     get '/:resource/', to: 'crud#index', via: :get
     match '/:resource/', to: 'crud#create', via: :post
