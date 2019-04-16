@@ -71,10 +71,7 @@ RSpec.describe 'Used Model requests', type: :request do
     end
 
     context 'by grouping' do
-      column_by, column_fields = [:active, :account_id, :unit_id, :brand, :name, :slug,
-        :model, :version, :model_year, :production_year, :kind, :new_vehicle, :old_price,
-        :price_value, :price, :category, :transmission, :km_value, :km, :plate, :color, :doors,
-        :fuel, :fuel_text, :shielded].sample(2)
+      column_by, column_fields = UsedModel.column_names.sample(2)
 
       before(:all) do
         get '/api/v1/used_model', params: {
