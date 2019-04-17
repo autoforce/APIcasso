@@ -100,7 +100,7 @@ RSpec.describe 'Used Model requests', type: :request do
       end
 
       it 'returns all records sorted queried' do
-        used_model_sorted = UsedModel.order(:brand, :model).map(&:id)
+        used_model_sorted = UsedModel.unscope(:order).order(brand: :asc, model: :asc).map(&:id)
         entries = JSON.parse(response.body)['entries'].map { |model| model['id'] }
         expect(entries).to eq(used_model_sorted)
       end

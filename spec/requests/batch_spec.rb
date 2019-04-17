@@ -13,6 +13,7 @@ RSpec.describe 'Batch requests', type: :request do
         @used_model = create(:used_model)
         @another_used_model = create(:used_model)
         while @another_used_model.send(@attribute) == @used_model.send(@attribute)
+          @attribute = UsedModel.column_names.sample
           @another_used_model = create(:used_model)
         end
         post '/api/v1/ql/', params: { used_models: { "#{@attribute}_eq": @used_model.send(@attribute) } }.to_json, headers: access_token
