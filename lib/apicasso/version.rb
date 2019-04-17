@@ -3,5 +3,5 @@
 # A Module to rule them all...
 module Apicasso
   # Current gem version
-  VERSION = '0.7.0'.freeze
+  VERSION = '0.7.1'.freeze
 end
