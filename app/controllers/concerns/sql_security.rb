@@ -31,8 +31,8 @@ module SqlSecurity
   ].freeze
 
   # Check if request is a SQL injection
-  def sql_injection(klass)
-    apicasso_parameters.each do |name, value|
+  def sql_injection(klass, hash = nil)
+    apicasso_parameters(hash).each do |name, value|
       next unless Array.wrap(klass).any? do |klass|
         !safe_parameter?(klass, name, value)
       end
@@ -47,8 +47,13 @@ module SqlSecurity
   def safe_parameter?(klass, name, value)
     if name.to_sym == :group
       group_sql_safe?(klass, value)
-    elsif params[:batch].present?
-      parameters_sql_safe?(klass.singularize.constantize, value)
+    elsif name.to_sym == :batch
+      value.each do |name, val|
+        parameters_sql_safe?(klass.name.singularize.constantize, name)
+        Array.wrap(value).each do |inner_val|
+          sql_injection(klass, inner_val)
+        end
+      end
     else
       parameters_sql_safe?(klass, value)
     end
@@ -120,7 +125,7 @@ module SqlSecurity
 
   # Parameters used on the APIcasso that should be checked against
   # security measures
-  def apicasso_parameters
-    params.to_unsafe_h.slice(:group, :resource, :nested, :sort, :include, :crud)
+  def apicasso_parameters(hash = nil)
+    (hash || params.to_unsafe_h).slice(:group, :resource, :nested, :sort, :include, :batch)
   end
 end
