@@ -97,8 +97,8 @@ module Apicasso
     # going to be rendered, if authorized
     def set_records
       authorize! :read, resource.name.underscore.to_sym
-      @records = resource.ransack(parsed_query).result
-      @object = resource.new
+      @records = request_collection.ransack(parsed_query).result
+      @object = request_collection.new
       key_scope_records
       reorder_records if params[:sort].present?
       select_fields if params[:select].present?
@@ -182,7 +182,16 @@ module Apicasso
 
     # Setup to stablish the nested model to be queried
     def set_nested_resource
-      @nested_resource = @object.send(params[:nested].underscore.pluralize)
+      @nested_resource = request_collection.klass
+    end
+
+    # Gets the collection of objects based on request
+    def request_collection
+      if params[:nested].present?
+        @object.send(params[:nested].underscore.pluralize)
+      else
+        resource
+      end
     end
   end
 end
