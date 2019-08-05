@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.test_files = Dir["spec/**/*"]
 
   s.add_development_dependency 'bundler'
-  s.add_development_dependency 'capybara', '~> 3.15.0'
+  s.add_development_dependency 'capybara', '~> 3.28.0'
   s.add_development_dependency 'database_cleaner'
   s.add_development_dependency 'factory_bot_rails'
   s.add_development_dependency 'faker'
