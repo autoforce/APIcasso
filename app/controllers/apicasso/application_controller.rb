@@ -35,13 +35,9 @@ module Apicasso
     # your project is using some kind of ActiveRecord extension with a
     # `.delay` method, which when not present makes your API very slow.
     def register_api_request
-      Apicasso::Request.delay.create(api_key_id: @api_key.try(:id),
-                                     object: { request: request_metadata,
-                                               response: response_metadata })
+      Rails.logger.info("[APICasso] " +{api_key_id: @api_key.try(:id), object: { request: request_metadata, response: response_metadata }}.to_json)
     rescue NoMethodError
-      Apicasso::Request.create(api_key_id: @api_key.try(:id),
-                               object: { request: request_metadata,
-                                         response: response_metadata })
+      Rails.logger.error("[APICasso] " +{api_key_id: @api_key.try(:id), object: { request: request_metadata, response: response_metadata }}.to_json)
     end
 
     # Information that gets inserted on `register_api_request` as auditing data
