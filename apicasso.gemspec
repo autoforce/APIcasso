@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-rails'
 
   s.add_dependency 'cancancan', '>= 2', '< 4'
-  s.add_dependency 'friendly_id', '~> 5.2.0'
+  s.add_dependency 'friendly_id', '>= 5.2', '< 5.4'
   s.add_dependency 'rack-cors'
   s.add_dependency 'rails', '> 5'
   s.add_dependency 'ransack'
