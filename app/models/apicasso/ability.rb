@@ -44,17 +44,17 @@ module Apicasso
         end
       end
     end
-  end
-
-  # Given a permission, a class and a hash of clearance conditions
-  # builds permissions for the current ability.
-  # Usage:
-  # To have a key reading all banners from a channel with id 999
-  # you would have a scope:
-  # => `{read: {banner: {owner_id: [999]}}}`
-  def clear_for(permission, klass, clearance)
-    clearance.to_h.each do |by_field, values|
-      can permission, klass, by_field.to_sym => values
+    
+    # Given a permission, a class and a hash of clearance conditions
+    # builds permissions for the current ability.
+    # Usage:
+    # To have a key reading all banners from a channel with id 999
+    # you would have a scope:
+    # => `{read: {banner: {owner_id: [999]}}}`
+    def clear_for(permission, klass, clearance)
+      clearance.to_h.each do |by_field, values|
+        can permission, klass, by_field.to_sym => values
+      end
     end
   end
 end
