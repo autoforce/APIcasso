@@ -90,7 +90,7 @@ module Apicasso
     rescue NoMethodError
       @object = resource.find(id)
     ensure
-      authorize! action_to_cancancan, @object
+      authorize! action_to_cancancan, @object if @object.present?
     end
 
     # Used to setup the records from the selected resource that are
