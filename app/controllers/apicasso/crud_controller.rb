@@ -97,7 +97,7 @@ module Apicasso
     # going to be rendered, if authorized
     def set_records
       authorize! :read, resource.name.underscore.to_sym
-      @records = request_collection.ransack(parsed_query).result
+      @records = request_collection.ransack(parsed_query).result(distinct: true)
       @object = request_collection.new
       key_scope_records
       reorder_records if params[:sort].present?
