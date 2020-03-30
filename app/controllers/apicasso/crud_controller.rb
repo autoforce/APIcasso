@@ -113,7 +113,7 @@ module Apicasso
 
     # Reordering of records which happens when receiving `params[:sort]`
     def reorder_records
-      if params[:sort] == 'random'
+      if params[:sort] == 'rand'
         @records = @records.unscope(:order).order('RANDOM()')
       else
         @records = @records.unscope(:order).order(ordering_params(params))
