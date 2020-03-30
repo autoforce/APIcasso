@@ -62,7 +62,7 @@ module SqlSecurity
   # Check for SQL injection before requests to avoid unsafe
   # contantizes and evals along the execution chain
   def bad_request?
-    if if params[:sort] != 'rand'
+    if params[:sort] != 'rand'
       raise ActionController::BadRequest.new("Bad hacker, stop bullying or I'll tell your mom!") if sql_injection(resource)
     end
   end
