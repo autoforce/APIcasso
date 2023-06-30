@@ -77,7 +77,7 @@ RSpec.describe 'Used Model requests', type: :request do
         get '/api/v1/used_models', params: {
           'group[by]': column_by,
           'group[calculate]': 'count',
-          'group[fields]': column_fields
+          'group[field]': column_fields
         }, headers: access_token
       end
 
