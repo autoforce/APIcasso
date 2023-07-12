@@ -37,7 +37,7 @@ module Apicasso
         resource = batch_resource.classify.constantize
         authorize_for(action: :index,
                       resource: batch_module.singularize.to_sym)
-        records = resource.ransack(parsed_query(query)).result.as_json
+        records = resource.ransack(parsed_query(query)).result(distinct: true).as_json
         [batch_module, records]
       end.to_h
       render json: returns
