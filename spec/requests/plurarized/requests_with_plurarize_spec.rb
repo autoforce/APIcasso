@@ -86,7 +86,7 @@ RSpec.describe 'Used Model requests', type: :request do
       end
 
       it 'returns all records grouped by field queried' do
-        expect(response.body).to eq(UsedModel.group(column_by).calculate(:count, column_fields).to_json)
+        expect(response.body).to eq(UsedModel.group(column_by).distinct.calculate(:count, column_fields).to_json)
       end
     end
 
@@ -100,7 +100,7 @@ RSpec.describe 'Used Model requests', type: :request do
       end
 
       it 'returns all records sorted queried' do
-        used_model_sorted = UsedModel.unscope(:order).order(brand: :asc, model: :asc).map(&:id)
+        used_model_sorted = UsedModel.unscope(:order).order(brand: :asc, model: :asc).distinct.map(&:id)
         entries = JSON.parse(response.body)['entries'].map { |model| model['id'] }
         expect(entries).to eq(used_model_sorted)
       end
