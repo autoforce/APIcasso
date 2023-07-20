@@ -90,14 +90,14 @@ module Apicasso
     rescue NoMethodError
       @object = resource.find(id)
     ensure
-      authorize! action_to_cancancan, @object
+      authorize! action_to_cancancan, @object if @object.present?
     end
 
     # Used to setup the records from the selected resource that are
     # going to be rendered, if authorized
     def set_records
       authorize! :read, resource.name.underscore.to_sym
-      @records = request_collection.ransack(parsed_query).result
+      @records = request_collection.ransack(parsed_query).result(distinct: true)
       @object = request_collection.new
       key_scope_records
       reorder_records if params[:sort].present?
@@ -113,7 +113,11 @@ module Apicasso
 
     # Reordering of records which happens when receiving `params[:sort]`
     def reorder_records
-      @records = @records.unscope(:order).order(ordering_params(params))
+      if params[:sort] == 'rand'
+        @records = @records.unscope(:order).distinct(false).order('RANDOM()')
+      else
+        @records = @records.unscope(:order).order(ordering_params(params))
+      end
     end
 
     # Raw paginated records object

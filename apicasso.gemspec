@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.test_files = Dir["spec/**/*"]
 
   s.add_development_dependency 'bundler'
-  s.add_development_dependency 'capybara', '~> 3.15.0'
+  s.add_development_dependency 'capybara', '~> 3.33.0'
   s.add_development_dependency 'database_cleaner'
   s.add_development_dependency 'factory_bot_rails'
   s.add_development_dependency 'faker'
@@ -31,10 +31,10 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-rails'
 
   s.add_dependency 'cancancan', '>= 2', '< 4'
-  s.add_dependency 'friendly_id', '~> 5.2.0'
+  s.add_dependency 'friendly_id', '>= 5.2', '< 5.5'
   s.add_dependency 'rack-cors'
   s.add_dependency 'rails', '> 5'
   s.add_dependency 'ransack'
   s.add_dependency 'swagger-blocks'
-  s.add_dependency 'will_paginate', '~> 3.1.0'
+  s.add_dependency 'will_paginate', '>= 3.1', '< 3.4'
 end
