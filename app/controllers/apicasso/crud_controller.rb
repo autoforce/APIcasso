@@ -86,9 +86,11 @@ module Apicasso
     # Common setup to stablish which object this request is querying
     def set_object
       id = params[:id]
-      @object = resource.friendly.find(id)
+      associations = resource.reflect_on_all_associations(:has_many).map { |ass| ass.name }
+
+      @object = resource.friendly.where(id: id).includes(associations).first
     rescue NoMethodError
-      @object = resource.find(id)
+      @object = resource.where(id: id).includes(associations).first
     ensure
       authorize! action_to_cancancan, @object if @object.present?
     end
